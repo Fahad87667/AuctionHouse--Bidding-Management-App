@@ -13,7 +13,7 @@ A modern full-stack online auction platform built with ASP.NET Core Web API (bac
 ## Getting Started
 
 ### Backend (ASP.NET Core)
-1. Navigate to `eshop-api/`.
+1. Navigate to `backend/`.
 2. Configure your database connection in `appsettings.json`.
 3. Run migrations and start the API:
    ```sh
@@ -22,7 +22,7 @@ A modern full-stack online auction platform built with ASP.NET Core Web API (bac
    ```
 
 ### Frontend (React)
-1. Navigate to `eshop-frontend/`.
+1. Navigate to `frontend/`.
 2. Install dependencies:
    ```sh
    npm install
