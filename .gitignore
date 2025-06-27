@@ -1,0 +1,26 @@
+# ASP.NET Core
+eshop-api/bin/
+eshop-api/obj/
+eshop-api/Migrations/
+eshop-api/appsettings.Development.json
+
+# Legacy/Windows
+Bin/
+data base/
+*.mdf
+*.ldf
+*.dll
+*.refresh
+.DS_Store
+Thumbs.db
+
+# eShop legacy data
+/eShop/App_Data/
+/eShop/img/Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log 
