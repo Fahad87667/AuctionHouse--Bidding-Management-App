@@ -263,6 +263,7 @@ const AdminDashboard = () => {
   }
 
   return (
+    
     <div className="container py-5">
       <div className="text-center mb-5">
         <div className="mb-3">
@@ -285,169 +286,340 @@ const AdminDashboard = () => {
       </div>
 
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1>Admin Dashboard</h1>
-        <Button variant="success" style={{ fontWeight: 600, borderRadius: 24, padding: '12px 32px', fontSize: 18 }} onClick={() => setShowAddModal(true)}>
+        <div className="d-flex align-items-center">
+          <Badge style={{ 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            padding: '10px 20px',
+            borderRadius: '25px',
+            fontSize: '16px',
+            marginRight: '12px'
+          }}>
+            <i className="fas fa-gavel me-2"></i>
+            {auctions.length} Total Auctions
+          </Badge>
+          <Badge style={{ 
+            background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
+            padding: '10px 20px',
+            borderRadius: '25px',
+            fontSize: '16px'
+          }}>
+            <i className="fas fa-hand-paper me-2"></i>
+            {bids.length} Total Bids
+          </Badge>
+        </div>
+        <Button 
+          onClick={() => setShowAddModal(true)}
+          style={{
+            background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
+            border: 'none',
+            borderRadius: '25px',
+            padding: '12px 24px',
+            fontWeight: '600',
+            transition: 'transform 0.2s ease',
+            boxShadow: '0 4px 15px rgba(72, 187, 120, 0.3)'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        >
+          <i className="fas fa-plus-circle me-2"></i>
           Add New Auction
         </Button>
       </div>
 
-      <div className="mb-4">
-        <Tabs
-          id="admin-dashboard-tabs"
-          activeKey={activeTab}
-          onSelect={(k) => setActiveTab(k)}
-          className="mb-3"
-          variant="pills"
-          style={{ borderRadius: '25px', overflow: 'hidden' }}
+      {error && (
+        <Alert 
+          variant="danger" 
+          dismissible 
+          onClose={() => setError('')}
+          style={{ 
+            borderRadius: '12px', 
+            border: 'none',
+            backgroundColor: '#fee',
+            color: '#c53030'
+          }}
         >
-          <Tab eventKey="summary" title={<span style={{ color: activeTab === 'summary' ? 'white' : '#764ba2' }}> <i className="fas fa-chart-bar me-2"></i>Summary</span>} tabClassName={activeTab === 'summary' ? 'tab-gradient' : ''}>
-            <div className="d-flex gap-3 mb-4">
-              <span className="badge" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '12px 28px', borderRadius: '25px', fontSize: '18px', fontWeight: 600 }}>
-                <i className="fas fa-list me-2"></i>{auctions.length} Total Auctions
-              </span>
-              <span className="badge" style={{ background: 'linear-gradient(135deg, #38b2ac 0%, #4299e1 100%)', padding: '12px 28px', borderRadius: '25px', fontSize: '18px', fontWeight: 600 }}>
-                <i className="fas fa-gavel me-2"></i>{bids.length} Total Bids
-              </span>
-            </div>
-          </Tab>
-          <Tab eventKey="recent" title={<span style={{ color: activeTab === 'recent' ? 'white' : '#764ba2' }}> <i className="fas fa-history me-2"></i>Recent Bids</span>} tabClassName={activeTab === 'recent' ? 'tab-gradient' : ''}>
-            <Card className="shadow-sm border-0 mb-4">
-              <Card.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                <Table responsive hover className="mb-0 align-middle">
-                  <thead>
+          <i className="fas fa-exclamation-circle me-2"></i>
+          {error}
+        </Alert>
+      )}
+
+      <Tabs
+        id="admin-dashboard-tabs"
+        activeKey={activeTab}
+        onSelect={(k) => setActiveTab(k)}
+        className="mb-4"
+        style={{
+          borderBottom: 'none'
+        }}
+      >
+        <Tab 
+          eventKey="summary" 
+          title={
+            <span style={{ 
+              padding: '10px 20px',
+              borderRadius: '25px',
+              background: activeTab === 'summary' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
+              color: activeTab === 'summary' ? 'white' : '#667eea',
+              fontWeight: '600',
+              display: 'inline-block'
+            }}>
+              <i className="fas fa-list me-2"></i>
+              Auction Items
+            </span>
+          }
+        >
+          <Card className="border-0 shadow-sm" style={{ borderRadius: '20px' }}>
+            <Card.Body className="p-0">
+              <div className="table-responsive">
+                <Table hover className="mb-0">
+                  <thead style={{ backgroundColor: '#f8fafc' }}>
                     <tr>
-                      <th>Amount</th>
-                      <th>Auction</th>
-                      <th>User</th>
-                      <th>Time</th>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">Title</th>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">Current Price</th>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">Bids</th>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">End Time</th>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">Status</th>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {bids.slice(0, 10).map((bid) => (
-                      <tr key={bid.id}>
-                        <td className="fw-bold" style={{ color: '#667eea' }}>${bid.amount}</td>
-                        <td>{bid.auctionTitle}</td>
-                        <td>{bid.userName || 'User'}</td>
-                        <td>{bid.timestamp ? new Date(bid.timestamp).toLocaleString() : 'N/A'}</td>
+                    {auctions.map((auction) => (
+                      <tr 
+                        key={auction.id}
+                        style={{ transition: 'background 0.2s ease' }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <td className="py-3 px-4">
+                          <div className="d-flex align-items-center">
+                            <img
+                              src={auction.imageUrl || 'https://via.placeholder.com/48x48?text=No+Image'}
+                              alt={auction.title}
+                              style={{
+                                width: '40px',
+                                height: '40px',
+                                objectFit: 'cover',
+                                borderRadius: '10px',
+                                background: '#f7fafc',
+                                border: '1px solid #e2e8f0',
+                                marginRight: '12px'
+                              }}
+                            />
+                            <span className="fw-semibold">{auction.title}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4">
+                        <span className="fw-bold" style={{ color: '#667eea' }}>
+                            ${auction.highestBid !== null && auction.highestBid !== undefined
+                              ? Number(auction.highestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                              : (auction.startingPrice !== null && auction.startingPrice !== undefined
+                                  ? Number(auction.startingPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                  : '0.00')}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="badge bg-light text-dark px-3 py-2" style={{ borderRadius: '15px' }}>
+                            {auction.bidCount} bids
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-muted">
+                          <small>
+                            <i className="far fa-calendar me-1"></i>
+                            {formatDate(auction.endTime)}
+                          </small>
+                        </td>
+                        <td className="py-3 px-4">{getStatusBadge(auction.endTime)}</td>
+                        <td className="py-3 px-4">
+                          <Button
+                            size="sm"
+                            className="me-2"
+                            onClick={() => openEditModal(auction)}
+                            style={{
+                              background: 'linear-gradient(135deg, #63b3ed 0%, #4299e1 100%)',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '8px',
+                              padding: '6px 12px',
+                              fontWeight: '600',
+                              boxShadow: '0 2px 8px rgba(66, 153, 225, 0.08)',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseOver={(e) => {
+                              e.currentTarget.style.background = 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)';
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.background = 'linear-gradient(135deg, #63b3ed 0%, #4299e1 100%)';
+                            }}
+                          >
+                            <i className="fas fa-edit me-1"></i>
+                            Edit
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleDeleteAuction(auction.id)}
+                            style={{
+                              background: 'linear-gradient(135deg, #feb2b2 0%, #f56565 100%)',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '8px',
+                              padding: '6px 12px',
+                              fontWeight: '600',
+                              boxShadow: '0 2px 8px rgba(245, 101, 101, 0.08)',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseOver={(e) => {
+                              e.currentTarget.style.background = 'linear-gradient(135deg, #f56565 0%, #c53030 100%)';
+                            }}
+                            onMouseOut={(e) => {
+                              e.currentTarget.style.background = 'linear-gradient(135deg, #feb2b2 0%, #f56565 100%)';
+                            }}
+                          >
+                            <i className="fas fa-trash me-1"></i>
+                            Delete
+                          </Button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </Table>
-              </Card.Body>
-            </Card>
-          </Tab>
-        </Tabs>
-      </div>
-
-      <Card className="mb-4 border-0 shadow-sm">
-        <Card.Header className="bg-white border-0">
-          <h4 className="fw-bold mb-0" style={{ color: '#2d3748' }}>
-            <i className="fas fa-table me-2" style={{ color: '#667eea' }}></i>
-            Auction Items
-          </h4>
-        </Card.Header>
-        <Card.Body className="p-0">
-          <Table responsive hover className="mb-0 align-middle">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Current Price</th>
-                <th>Bids</th>
-                <th>End Time</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {auctions.map((auction) => (
-                <tr key={auction.id}>
-                  <td>
-                    <img
-                      src={auction.imageUrl || 'https://via.placeholder.com/48x48?text=No+Image'}
-                      alt={auction.title}
-                      style={{
-                        width: '48px',
-                        height: '48px',
-                        objectFit: 'cover',
-                        borderRadius: '12px',
-                        background: '#f7fafc',
-                        border: '1px solid #e2e8f0',
-                        marginRight: '8px'
-                      }}
-                    />
-                    <span className="fw-semibold ms-2">{auction.title}</span>
-                  </td>
-                  <td className="text-primary fw-bold">
-                    ${auction.highestBid !== null && auction.highestBid !== undefined
-                      ? Number(auction.highestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                      : (auction.startingPrice !== null && auction.startingPrice !== undefined
-                          ? Number(auction.startingPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                          : '0.00')}
-                  </td>
-                  <td>
-                    <span style={{
-                      background: '#f7fafc',
-                      borderRadius: '12px',
-                      padding: '6px 16px',
-                      fontWeight: 600,
-                      fontSize: '15px',
-                      color: '#4a5568'
-                    }}>{auction.bidCount} bids</span>
-                  </td>
-                  <td>{new Date(auction.endTime).toLocaleString('en-GB')}</td>
-                  <td>{getStatusBadge(auction.endTime)}</td>
-                  <td>
-                    <div className="d-flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline-primary"
-                        style={{
-                          background: '#f0f4ff',
-                          color: '#2b6cb0',
-                          border: 'none',
-                          fontWeight: 600,
-                          borderRadius: '8px',
-                          boxShadow: '0 2px 8px rgba(102, 126, 234, 0.08)',
+              </div>
+            </Card.Body>
+          </Card>
+        </Tab>
+        
+        <Tab 
+          eventKey="recent" 
+          title={
+            <span style={{ 
+              padding: '10px 20px',
+              borderRadius: '25px',
+              background: activeTab === 'recent' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
+              color: activeTab === 'recent' ? 'white' : '#667eea',
+              fontWeight: '600',
+              display: 'inline-block'
+            }}>
+              <i className="fas fa-history me-2"></i>
+              Recent Bids
+            </span>
+          }
+        >
+          <Card className="border-0 shadow-sm" style={{ borderRadius: '20px', height: '600px' }}>
+            <Card.Header 
+              className="bg-white border-0 p-4" 
+              style={{ 
+                borderBottom: '1px solid #f0f4f8',
+                borderRadius: '20px 20px 0 0'
+              }}
+            >
+              <div className="d-flex justify-content-between align-items-center">
+                <h5 className="mb-0 fw-bold" style={{ color: '#2d3748' }}>
+                  <i className="fas fa-history me-2" style={{ color: '#4299e1' }}></i>
+                  Recent Bidding Activity
+                </h5>
+                <Badge style={{ 
+                  background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  fontSize: '14px'
+                }}>
+                  {bids.length} Total Bids
+                </Badge>
+              </div>
+            </Card.Header>
+            <Card.Body style={{ 
+              maxHeight: '500px', 
+              overflowY: 'auto', 
+              padding: '0',
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#667eea #f0f4f8'
+            }}>
+              <style>
+                {`
+                  .card-body::-webkit-scrollbar {
+                    width: 8px;
+                  }
+                  .card-body::-webkit-scrollbar-track {
+                    background: #f0f4f8;
+                    border-radius: 10px;
+                  }
+                  .card-body::-webkit-scrollbar-thumb {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border-radius: 10px;
+                  }
+                  .card-body::-webkit-scrollbar-thumb:hover {
+                    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+                  }
+                `}
+              </style>
+              {bids.length === 0 ? (
+                <div className="text-center py-5">
+                  <i className="fas fa-gavel text-muted mb-3" style={{ fontSize: '3rem' }}></i>
+                  <p className="text-muted">No bids placed yet</p>
+                </div>
+              ) : (
+                bids.slice(0, 50).map((bid, index) => (
+                  <div 
+                    key={bid.id} 
+                    className="px-4 py-3"
+                    style={{ 
+                      borderBottom: index < bids.length - 1 ? '1px solid #f0f4f8' : 'none',
+                      transition: 'background 0.2s ease'
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div className="d-flex align-items-center">
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '6px',
-                          transition: 'background 0.2s, color 0.2s'
-                        }}
-                        onClick={() => openEditModal(auction)}
-                        onMouseOver={e => { e.currentTarget.style.background = '#e2e8f0'; e.currentTarget.style.color = '#1a365d'; }}
-                        onMouseOut={e => { e.currentTarget.style.background = '#f0f4ff'; e.currentTarget.style.color = '#2b6cb0'; }}
-                      >
-                        <i className="fas fa-edit"></i> Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline-danger"
-                        style={{
-                          background: '#fff5f5',
-                          color: '#e53e3e',
-                          border: 'none',
-                          fontWeight: 600,
-                          borderRadius: '8px',
-                          boxShadow: '0 2px 8px rgba(229, 62, 62, 0.08)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          transition: 'background 0.2s, color 0.2s'
-                        }}
-                        onClick={() => handleDeleteAuction(auction.id)}
-                        onMouseOver={e => { e.currentTarget.style.background = '#fed7d7'; e.currentTarget.style.color = '#742a2a'; }}
-                        onMouseOut={e => { e.currentTarget.style.background = '#fff5f5'; e.currentTarget.style.color = '#e53e3e'; }}
-                      >
-                        <i className="fas fa-trash"></i> Delete
-                      </Button>
+                          justifyContent: 'center',
+                          marginRight: '12px'
+                        }}>
+                          <i className="fas fa-user text-white" style={{ fontSize: '16px' }}></i>
+                        </div>
+                        <div>
+                          <div className="d-flex align-items-center">
+                            <strong style={{ color: '#2d3748', fontSize: '16px' }}>
+                              ${bid.amount}
+                            </strong>
+                            <span className="badge ms-2" style={{ 
+                              background: '#e6f0ff',
+                              color: '#667eea',
+                              fontSize: '11px',
+                              padding: '4px 8px',
+                              borderRadius: '12px'
+                            }}>
+                              BID
+                            </span>
+                          </div>
+                          <small className="text-muted d-block">
+                            {bid.userName || bid.userEmail || 'Anonymous User'}
+                          </small>
+                        </div>
+                      </div>
+                      <div className="text-end">
+                        <small className="text-muted d-block">
+                          <i className="fas fa-gavel me-1"></i>
+                          {bid.auctionTitle}
+                        </small>
+                        <small className="text-muted">
+                          <i className="far fa-clock me-1"></i>
+                          {bid.timestamp ? new Date(bid.timestamp).toLocaleString() : 'N/A'}
+                        </small>
+                      </div>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
+                  </div>
+                ))
+              )}
+            </Card.Body>
+          </Card>
+        </Tab>
+      </Tabs>
 
       {/* Add Auction Modal */}
       <Modal show={showAddModal} onHide={handleCloseAddModal} size="lg">
@@ -584,7 +756,7 @@ const AdminDashboard = () => {
         </Form>
       </Modal>
 
-      {/* Edit Auction Modal */}
+      {/* Edit Auction Modal - same as Add Modal but with different title and submit button */}
       <Modal show={showEditModal} onHide={handleCloseEditModal} size="lg">
         <Modal.Header 
           closeButton 
@@ -723,3 +895,5 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+       
+       

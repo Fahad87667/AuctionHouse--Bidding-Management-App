@@ -49,7 +49,8 @@ const Footer = () => {
               </p>
               <div className="d-flex gap-3 mt-4">
                 <a 
-                  href="#" 
+                  href="https://github.com/fahad87667" 
+                  target="_blank" rel="noopener noreferrer"
                   className="text-white opacity-75"
                   style={{
                     width: '40px',
@@ -71,35 +72,12 @@ const Footer = () => {
                     e.currentTarget.style.transform = 'translateY(0)';
                   }}
                 >
-                  <i className="fab fa-facebook-f"></i>
+                  <i className="fab fa-github"></i>
                 </a>
+                
                 <a 
-                  href="#" 
-                  className="text-white opacity-75"
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    background: 'rgba(255,255,255,0.1)',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.3s ease',
-                    textDecoration: 'none'
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                    e.currentTarget.style.transform = 'translateY(-3px)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  <i className="fab fa-twitter"></i>
-                </a>
-                <a 
-                  href="#" 
+                  href="https://instagram.com/fahadkhan_369" 
+                  target="_blank" rel="noopener noreferrer"
                   className="text-white opacity-75"
                   style={{
                     width: '40px',
@@ -124,7 +102,8 @@ const Footer = () => {
                   <i className="fab fa-instagram"></i>
                 </a>
                 <a 
-                  href="#" 
+                  href="https://linkedin.com/in/fahad-khan-50b141233" 
+                  target="_blank" rel="noopener noreferrer"
                   className="text-white opacity-75"
                   style={{
                     width: '40px',
@@ -147,6 +126,31 @@ const Footer = () => {
                   }}
                 >
                   <i className="fab fa-linkedin-in"></i>
+                </a><a 
+                  href="https://twitter.com" 
+                  target="_blank" rel="noopener noreferrer"
+                  className="text-white opacity-75"
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    background: 'rgba(255,255,255,0.1)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.3s ease',
+                    textDecoration: 'none'
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    e.currentTarget.style.transform = 'translateY(-3px)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <i className="fab fa-twitter"></i>
                 </a>
               </div>
             </div>
@@ -259,12 +263,12 @@ const Footer = () => {
                 <i className="fas fa-map-marker-alt me-3 mt-1" style={{ color: '#667eea' }}></i>
                 <span className="text-light opacity-75">
                   123 Auction Street<br />
-                  New York, NY 10001
+                  Mumbai, Maharashtra 400001
                 </span>
               </li>
               <li className="mb-3 d-flex align-items-center">
                 <i className="fas fa-phone me-3" style={{ color: '#667eea' }}></i>
-                <span className="text-light opacity-75">+1 (555) 123-4567</span>
+                <span className="text-light opacity-75">+91 9876543210</span>
               </li>
               <li className="mb-3 d-flex align-items-center">
                 <i className="fas fa-envelope me-3" style={{ color: '#667eea' }}></i>
