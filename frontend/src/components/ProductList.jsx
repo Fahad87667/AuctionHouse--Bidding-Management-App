@@ -165,7 +165,7 @@ const AuctionItemList = () => {
                   <div className="d-flex justify-content-between align-items-center mb-2">
                     <span className="text-muted">Current Bid:</span>
                     <span className="fs-4 fw-bold" style={{ color: '#667eea' }}>
-                      £{item.highestBid !== null && item.highestBid !== undefined
+                      ₹{item.highestBid !== null && item.highestBid !== undefined
                         ? Number(item.highestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                         : (item.startingPrice !== null && item.startingPrice !== undefined
                             ? Number(item.startingPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -269,7 +269,7 @@ const AuctionItemList = () => {
                   <div className="p-3" style={{ background: '#f7fafc', borderRadius: '12px' }}>
                     <small className="text-muted d-block mb-1">Current Highest Bid</small>
                     <span className="fs-3 fw-bold" style={{ color: '#667eea' }}>
-                      £{bidModal.item.highestBid !== null && bidModal.item.highestBid !== undefined
+                      ₹{bidModal.item.highestBid !== null && bidModal.item.highestBid !== undefined
                         ? Number(bidModal.item.highestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                         : (bidModal.item.startingPrice !== null && bidModal.item.startingPrice !== undefined
                             ? Number(bidModal.item.startingPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -280,7 +280,7 @@ const AuctionItemList = () => {
                 
                 <div className="mb-3">
                   <label className="form-label fw-semibold text-secondary">
-                    <i className="fas fa-pound-sign me-2"></i>Your Bid Amount
+                    <i className="fas fa-rupee-sign me-2"></i>Your Bid Amount
                   </label>
                   <input
                     type="number"
@@ -288,7 +288,7 @@ const AuctionItemList = () => {
                     value={bidAmount}
                     onChange={e => setBidAmount(e.target.value)}
                     className="form-control form-control-lg"
-                    placeholder={`Enter more than £${Number(bidModal.item.highestBid ?? bidModal.item.startingPrice)}`}
+                    placeholder={`Enter more than ₹${Number(bidModal.item.highestBid ?? bidModal.item.startingPrice)}`}
                     style={{ 
                       borderRadius: '12px',
                       border: '1.5px solid #e2e8f0',

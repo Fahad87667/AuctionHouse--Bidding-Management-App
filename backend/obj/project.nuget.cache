@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "UYxG/v6lMSs=",
+  "dgSpecHash": "95hRpt8gDtY=",
   "success": true,
-  "projectFilePath": "C:\\Users\\ftkha\\Downloads\\DotNetProject\\eshop-api\\eshop-api.csproj",
+  "projectFilePath": "C:\\Users\\ftkha\\Downloads\\DotNetProject\\backend\\eshop-api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ftkha\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\ftkha\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\8.0.13\\microsoft.aspnetcore.authentication.jwtbearer.8.0.13.nupkg.sha512",

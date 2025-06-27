@@ -149,7 +149,7 @@ const Cart = () => {
                         <div className="d-flex align-items-center">
                           <span className="text-muted me-3">
                             <i className="fas fa-tag me-1"></i>
-                            ${item.product?.price}
+                            {item.product?.price} ₹
                           </span>
                           <span className="text-muted">
                             <i className="fas fa-times me-1"></i>
@@ -158,7 +158,7 @@ const Cart = () => {
                         </div>
                         <div className="mt-2">
                           <span className="fw-bold" style={{ color: '#667eea', fontSize: '18px' }}>
-                            ${(item.product?.price * item.quantity).toFixed(2)}
+                            {(item.product?.price * item.quantity).toFixed(2)} ₹
                           </span>
                         </div>
                       </div>
@@ -213,13 +213,13 @@ const Cart = () => {
                   }}>
                     <div className="d-flex justify-content-between align-items-center">
                       <span className="text-muted">Subtotal:</span>
-                      <span className="fs-5">${calculateTotal().toFixed(2)}</span>
+                      <span className="fs-5">{calculateTotal().toFixed(2)} ₹</span>
                     </div>
                     <hr style={{ borderColor: '#e2e8f0' }} />
                     <div className="d-flex justify-content-between align-items-center">
                       <span className="fw-bold fs-5" style={{ color: '#2d3748' }}>Total:</span>
                       <span className="fw-bold fs-3" style={{ color: '#667eea' }}>
-                        ${calculateTotal().toFixed(2)}
+                        {calculateTotal().toFixed(2)} ₹
                       </span>
                     </div>
                   </div>

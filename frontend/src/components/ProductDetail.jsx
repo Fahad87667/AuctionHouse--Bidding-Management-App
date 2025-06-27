@@ -165,10 +165,10 @@ const AuctionItemDetail = () => {
               <div className="row g-3">
                 <div className="col-6">
                   <div className="text-center p-3" style={{ background: '#f7fafc', borderRadius: '12px' }}>
-                    <i className="fas fa-pound-sign text-primary fs-4 mb-2 d-block"></i>
+                    <i className="fas fa-rupee-sign text-primary fs-4 mb-2 d-block"></i>
                     <small className="text-muted d-block">Current Bid</small>
                     <span className="fs-3 fw-bold" style={{ color: '#667eea' }}>
-                      £{item.highestBid}
+                      ₹{item.highestBid}
                     </span>
                   </div>
                 </div>
@@ -205,14 +205,14 @@ const AuctionItemDetail = () => {
                   background: '#f7fafc', 
                   border: '1.5px solid #e2e8f0',
                   borderRight: 'none'
-                }}>£</span>
+                }}>₹</span>
                 <input
                   type="number"
                   min={item.highestBid + 1}
                   value={bidAmount}
                   onChange={e => setBidAmount(e.target.value)}
                   className="form-control"
-                  placeholder={`Enter more than £${item.highestBid}`}
+                  placeholder={`Enter more than ₹${item.highestBid}`}
                   disabled={item.timeLeft === 'Ended'}
                   style={{ 
                     border: '1.5px solid #e2e8f0',
@@ -286,7 +286,7 @@ const AuctionItemDetail = () => {
                         <i className="fas fa-user me-2"></i>Bidder
                       </th>
                       <th className="fw-semibold text-secondary py-3">
-                        <i className="fas fa-pound-sign me-2"></i>Amount
+                        <i className="fas fa-rupee-sign me-2"></i>Amount
                       </th>
                       <th className="fw-semibold text-secondary py-3">
                         <i className="fas fa-clock me-2"></i>Time
@@ -325,7 +325,7 @@ const AuctionItemDetail = () => {
                         </td>
                         <td className="py-3">
                           <span className="fs-5 fw-semibold" style={{ color: index === 0 ? '#667eea' : '#4a5568' }}>
-                            £{bid.amount}
+                            ₹{bid.amount}
                           </span>
                         </td>
                         <td className="py-3 text-muted">

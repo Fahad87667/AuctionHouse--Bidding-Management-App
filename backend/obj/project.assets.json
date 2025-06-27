@@ -3101,11 +3101,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\ftkha\\Downloads\\DotNetProject\\eshop-api\\eshop-api.csproj",
+      "projectUniqueName": "C:\\Users\\ftkha\\Downloads\\DotNetProject\\backend\\eshop-api.csproj",
       "projectName": "eshop-api",
-      "projectPath": "C:\\Users\\ftkha\\Downloads\\DotNetProject\\eshop-api\\eshop-api.csproj",
+      "projectPath": "C:\\Users\\ftkha\\Downloads\\DotNetProject\\backend\\eshop-api.csproj",
       "packagesPath": "C:\\Users\\ftkha\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\ftkha\\Downloads\\DotNetProject\\eshop-api\\obj\\",
+      "outputPath": "C:\\Users\\ftkha\\Downloads\\DotNetProject\\backend\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

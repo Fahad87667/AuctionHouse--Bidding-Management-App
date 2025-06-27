@@ -253,9 +253,8 @@ const AuctionItemDetail = () => {
                     borderRadius: '16px',
                     color: 'white'
                   }}>
-                    <i className="fas fa-dollar-sign fs-3 mb-2 d-block"></i>
                     <div className="display-6 fw-bold">
-                      ${currentPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {`₹${currentPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                     </div>
                     <small>Current Price</small>
                   </div>
@@ -292,7 +291,7 @@ const AuctionItemDetail = () => {
                       <Col md={8}>
                         <Form.Group>
                           <Form.Label className="fw-semibold text-secondary mb-2">
-                            Your Bid Amount ($)
+                            Your Bid Amount (₹)
                           </Form.Label>
                           <div className="input-group">
                             <span className="input-group-text" style={{ 
@@ -301,7 +300,7 @@ const AuctionItemDetail = () => {
                               borderRight: 'none',
                               borderRadius: '12px 0 0 12px'
                             }}>
-                              <i className="fas fa-dollar-sign"></i>
+                              <i className="fas fa-rupee-sign"></i>
                             </span>
                             <Form.Control
                               type="number"
@@ -309,7 +308,7 @@ const AuctionItemDetail = () => {
                               step="0.01"
                               value={bidAmount}
                               onChange={(e) => setBidAmount(e.target.value)}
-                              placeholder={`Minimum: $${(currentPrice + 1).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                              placeholder={`Minimum: ₹${(currentPrice + 1).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                               required
                               style={{ 
                                 border: '1.5px solid #e2e8f0',
@@ -493,10 +492,10 @@ const AuctionItemDetail = () => {
                               color: index === 0 ? '#667eea' : '#4a5568',
                               fontSize: '18px'
                             }}>
-                              ${bid.amount.toLocaleString(undefined, { 
+                              {`₹${bid.amount.toLocaleString('en-IN', { 
                                 minimumFractionDigits: 2, 
                                 maximumFractionDigits: 2 
-                              })}
+                              })}`}
                             </span>
                           </div>
                         </div>

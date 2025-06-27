@@ -219,11 +219,11 @@ const AuctionItemList = () => {
                       <div className="d-flex justify-content-between align-items-center mb-2">
                         <span className="text-muted small">Current Bid</span>
                         <span className="fw-bold fs-5" style={{ color: '#667eea' }}>
-                          ${auction.highestBid !== null && auction.highestBid !== undefined
-                            ? Number(auction.highestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                          {auction.highestBid !== null && auction.highestBid !== undefined
+                            ? '₹' + Number(auction.highestBid).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                             : (auction.startingPrice !== null && auction.startingPrice !== undefined
-                                ? Number(auction.startingPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                                : '0.00')}
+                                ? '₹' + Number(auction.startingPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                : '₹0.00')}
                         </span>
                       </div>
                       <div className="d-flex justify-content-between align-items-center">

@@ -84,6 +84,22 @@ const NavigationBar = () => {
               Auctions
             </Nav.Link>
             
+            <Nav.Link 
+              as={Link} 
+              to="/about"
+              className="mx-2 fw-semibold"
+              style={{ 
+                color: '#4a5568',
+                transition: 'color 0.2s ease',
+                position: 'relative'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.color = '#667eea'}
+              onMouseOut={(e) => e.currentTarget.style.color = '#4a5568'}
+            >
+              <i className="fas fa-info-circle me-2"></i>
+              About
+            </Nav.Link>
+            
             {user && !isAdmin && (
               <Nav.Link 
                 as={Link} 

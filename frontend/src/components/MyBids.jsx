@@ -155,7 +155,7 @@ const MyBids = () => {
                     </td>
                     <td className="py-4 px-4">
                       <span className="fs-5 fw-bold" style={{ color: '#667eea' }}>
-                        £{Number(bid.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {'₹' + Number(bid.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </td>
                     <td className="py-4 px-4 text-muted">

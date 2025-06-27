@@ -410,10 +410,10 @@ const AdminDashboard = () => {
                         </td>
                         <td className="py-3 px-4">
                         <span className="fw-bold" style={{ color: '#667eea' }}>
-                            ${auction.highestBid !== null && auction.highestBid !== undefined
-                              ? Number(auction.highestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                            {auction.highestBid !== null && auction.highestBid !== undefined
+                              ? '₹' + Number(auction.highestBid).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                               : (auction.startingPrice !== null && auction.startingPrice !== undefined
-                                  ? Number(auction.startingPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                  ? '₹' + Number(auction.startingPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                                   : '0.00')}
                           </span>
                         </td>
@@ -585,7 +585,9 @@ const AdminDashboard = () => {
                         <div>
                           <div className="d-flex align-items-center">
                             <strong style={{ color: '#2d3748', fontSize: '16px' }}>
-                              ${bid.amount}
+                              {bid.amount !== null && bid.amount !== undefined
+                                ? '₹' + bid.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                : '0.00'}
                             </strong>
                             <span className="badge ms-2" style={{ 
                               background: '#e6f0ff',
@@ -675,7 +677,7 @@ const AdminDashboard = () => {
               <Col md={6}>
                 <Form.Group className="mb-4">
                   <Form.Label className="fw-semibold text-secondary">
-                    <i className="fas fa-dollar-sign me-2"></i>Starting Price
+                    <i className="fas fa-rupee-sign me-2"></i>Starting Price
                   </Form.Label>
                   <Form.Control
                     type="number"
@@ -810,7 +812,7 @@ const AdminDashboard = () => {
               <Col md={6}>
                 <Form.Group className="mb-4">
                   <Form.Label className="fw-semibold text-secondary">
-                    <i className="fas fa-dollar-sign me-2"></i>Starting Price
+                    <i className="fas fa-rupee-sign me-2"></i>Starting Price
                   </Form.Label>
                   <Form.Control
                     type="number"
