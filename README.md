@@ -13,6 +13,20 @@ A modern Auction Platform built with a .NET (C#) backend and a React frontend.
   - Secure image upload and local storage
   - Responsive, modern UI
 
+## 📸 Screenshots
+
+### Home / Auction List
+![Auction List](frontend/public/images/home.png)
+
+### Auction Detail & Bidding
+![Auction Detail](frontend/public/images/Detail.png)
+
+### Admin Dashboard
+![Admin Dashboard](frontend/public/images/panel.png)
+
+### User Bid History
+![User Bids](frontend/public/images/bids.png)
+
 ## 📁 Folder Structure
 ```
 DotNetProject/
