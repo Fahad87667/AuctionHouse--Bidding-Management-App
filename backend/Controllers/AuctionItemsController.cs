@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -108,5 +110,43 @@ public class AuctionItemsController : ControllerBase
         _context.AuctionItems.Remove(item);
         await _context.SaveChangesAsync();
         return NoContent();
+    }
+
+    [HttpPost("upload-image")]
+    [Authorize(Roles = "Admin,Seller")]
+    public async Task<IActionResult> UploadImage([FromForm] IFormFile image)
+    {
+        if (image == null || image.Length == 0)
+            return BadRequest("No file uploaded");
+
+        // Validate file type
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif" };
+        var extension = Path.GetExtension(image.FileName).ToLowerInvariant();
+        if (!allowedExtensions.Contains(extension))
+            return BadRequest("Invalid file type. Only image files are allowed.");
+
+        // Generate unique filename
+        var fileName = $"{Guid.NewGuid()}{extension}";
+        var imagesPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+        if (!Directory.Exists(imagesPath))
+            Directory.CreateDirectory(imagesPath);
+        var filePath = Path.Combine(imagesPath, fileName);
+
+        // Save file
+        try
+        {
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await image.CopyToAsync(stream);
+            }
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error saving file: {ex.Message}");
+        }
+
+        // Return relative path
+        var relativePath = $"/images/{fileName}";
+        return Ok(new { imageUrl = relativePath });
     }
 } 

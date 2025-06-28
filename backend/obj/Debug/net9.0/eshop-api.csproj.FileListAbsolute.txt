@@ -116,6 +116,7 @@ C:\Users\ftkha\Downloads\DotNetProject\eshop-api\obj\Debug\net9.0\eshop-api.genr
 C:\Users\ftkha\Downloads\DotNetProject\eshop-api\obj\Debug\net9.0\ref\eshop-api.dll
 C:\Users\ftkha\Downloads\DotNetProject\backend\bin\Debug\net9.0\appsettings.Development.json
 C:\Users\ftkha\Downloads\DotNetProject\backend\bin\Debug\net9.0\appsettings.json
+C:\Users\ftkha\Downloads\DotNetProject\backend\bin\Debug\net9.0\eshop-api.staticwebassets.runtime.json
 C:\Users\ftkha\Downloads\DotNetProject\backend\bin\Debug\net9.0\eshop-api.staticwebassets.endpoints.json
 C:\Users\ftkha\Downloads\DotNetProject\backend\bin\Debug\net9.0\eshop-api.exe
 C:\Users\ftkha\Downloads\DotNetProject\backend\bin\Debug\net9.0\eshop-api.deps.json

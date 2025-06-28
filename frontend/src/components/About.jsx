@@ -26,7 +26,7 @@ const About = () => {
       // Use imported image: image: developer2Photo,
       // Or use public folder: image: '/images/sarah-chen.jpg',
       // Placeholder for now:
-      image: '/images/car1.jpg', // Place image in public/images/developer2.jpg
+      image: '/images/Rajesh.jpg', // Place image in public/images/developer2.jpg
       bio: 'Dedicated to crafting beautiful, intuitive interfaces that users love. Expert in modern frontend technologies and design principles.',
       github: 'https://github.com',
       linkedin: 'https://linkedin.com',
@@ -74,13 +74,12 @@ const About = () => {
               <div style={{ 
                 width: '400px', 
                 height: '400px',
-                background: 'rgba(255,255,255,0.1)',
+                background: '#f7fafc',
                 borderRadius: '50%',
                 margin: '0 auto',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                backdropFilter: 'blur(10px)'
+                justifyContent: 'center'
               }}>
                 <i className="fas fa-gavel text-white" style={{ fontSize: '150px' }}></i>
               </div>
@@ -94,7 +93,7 @@ const About = () => {
           right: '-50px',
           width: '200px',
           height: '200px',
-          background: 'rgba(255,255,255,0.1)',
+          background: '#f7fafc',
           borderRadius: '50%'
         }}></div>
         <div style={{
@@ -103,7 +102,7 @@ const About = () => {
           left: '-100px',
           width: '300px',
           height: '300px',
-          background: 'rgba(255,255,255,0.05)',
+          background: '#f7fafc',
           borderRadius: '50%'
         }}></div>
       </div>

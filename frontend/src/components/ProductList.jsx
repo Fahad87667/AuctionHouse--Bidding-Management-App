@@ -96,31 +96,38 @@ const AuctionItemList = () => {
       <div className="row g-4">
         {items.map((item) => (
           <div key={item.id} className="col-md-6 col-lg-4">
-            <div className="card h-100 shadow-sm" style={{ 
-              borderRadius: '16px', 
-              overflow: 'hidden',
-              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-              border: 'none'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-5px)';
-              e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 0.125rem 0.25rem rgba(0,0,0,0.075)';
-            }}>
-              <Link to={`/item/${item.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div style={{ position: 'relative', overflow: 'hidden', height: '200px' }}>
+            <Link to={`/auction/${item.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}>
+              <div className="card h-100 shadow-sm" style={{ 
+                borderRadius: '16px', 
+                overflow: 'hidden',
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                border: 'none',
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: '420px',
+                background: '#fff'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'translateY(-5px)';
+                e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 0.125rem 0.25rem rgba(0,0,0,0.075)';
+              }}>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#f7fafc', overflow: 'hidden' }}>
                   <img
-                    src={item.imageUrl || 'https://via.placeholder.com/300x200?text=Auction+Item'}
+                    src={item.imageUrl ? (item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5100${item.imageUrl}`) : '/images/no-image.png'}
                     alt={item.title}
                     className="card-img-top"
                     style={{ 
-                      height: '100%', 
+                      width: '100%',
+                      height: '100%',
                       objectFit: 'cover',
-                      transition: 'transform 0.3s ease'
+                      transition: 'transform 0.3s ease',
+                      borderRadius: 0
                     }}
+                    onError={e => { e.target.onerror = null; e.target.src = '/images/no-image.png'; }}
                     onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
                     onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
                   />
@@ -134,7 +141,8 @@ const AuctionItemList = () => {
                       background: 'rgba(0,0,0,0.7)',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
+                      justifyContent: 'center',
+                      zIndex: 2
                     }}>
                       <span className="badge bg-danger fs-6 px-4 py-2" style={{ borderRadius: '20px' }}>
                         AUCTION ENDED
@@ -142,96 +150,51 @@ const AuctionItemList = () => {
                     </div>
                   )}
                 </div>
-              </Link>
-              
-              <div className="card-body p-4">
-                <Link to={`/item/${item.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <h5 className="card-title fw-bold mb-3" style={{ color: '#2d3748' }}>
-                    {item.title}
-                  </h5>
-                </Link>
-                
-                <p className="card-text text-muted mb-3" style={{ 
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical'
-                }}>
-                  {item.description}
-                </p>
-                
-                <div className="mb-3">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span className="text-muted">Current Bid:</span>
-                    <span className="fs-4 fw-bold" style={{ color: '#667eea' }}>
-                      ₹{item.highestBid !== null && item.highestBid !== undefined
-                        ? Number(item.highestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                        : (item.startingPrice !== null && item.startingPrice !== undefined
-                            ? Number(item.startingPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                            : '0.00')}
-                    </span>
+                <div className="card-body p-4 d-flex flex-column" style={{ flex: 1, justifyContent: 'space-between' }}>
+                  <div>
+                    <h5 className="card-title fw-bold mb-2" style={{ color: '#2d3748', fontSize: '1.25rem', lineHeight: 1.2 }}>{item.title}</h5>
+                    <p className="card-text text-muted mb-3" style={{ fontSize: '1rem', lineHeight: 1.4, minHeight: '2.5em', maxHeight: '2.5em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.description}</p>
                   </div>
-                  
-                  <div className="row g-2 text-center">
-                    <div className="col-6">
-                      <div className="p-2" style={{ background: '#f7fafc', borderRadius: '8px' }}>
-                        <i className="fas fa-users text-primary me-1"></i>
-                        <small className="text-muted d-block">Bids</small>
-                        <span className="fw-semibold">{item.bidCount}</span>
-                      </div>
+                  <div style={{ background: '#f7fafc', borderRadius: '12px', padding: '1rem', marginTop: 'auto' }}>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span className="text-muted">Current Bid:</span>
+                      <span className="fs-5 fw-bold" style={{ color: '#667eea' }}>
+                        ₹{item.highestBid !== null && item.highestBid !== undefined
+                          ? Number(item.highestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                          : (item.startingPrice !== null && item.startingPrice !== undefined
+                              ? Number(item.startingPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                              : '0.00')}
+                      </span>
                     </div>
-                    <div className="col-6">
-                      <div className="p-2" style={{ background: '#f7fafc', borderRadius: '8px' }}>
-                        <i className="fas fa-clock text-warning me-1"></i>
-                        <small className="text-muted d-block">Time Left</small>
-                        <span className="fw-semibold">{item.timeLeft}</span>
-                      </div>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <span className="text-muted"><i className="fas fa-users me-1"></i>{item.bidCount} bids</span>
+                      <span className="text-muted"><i className="fas fa-clock me-1"></i>{item.timeLeft}</span>
                     </div>
-                  </div>
-                  
-                  <div className="mt-2 p-2 text-center" style={{ background: '#e6fffa', borderRadius: '8px' }}>
-                    <small className="text-muted">
-                      <i className="fas fa-trophy text-success me-1"></i>
-                      Leading: <span className="fw-semibold">{item.winningUser || 'No bids yet'}</span>
-                    </small>
+                    <div className="mt-2 text-center" style={{ background: '#e6fffa', borderRadius: '8px', padding: '0.5em 0' }}>
+                      <small className="text-muted">
+                        <i className="fas fa-trophy text-success me-1"></i>
+                        Leading: <span className="fw-semibold">
+                          {item.winningUser && item.highestBid ? (
+                            <>
+                              {item.winningUser} <span style={{ color: '#667eea' }}>
+                                (₹{Number(item.highestBid).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                              </span>
+                            </>
+                          ) : 'No bids yet'}
+                        </span>
+                      </small>
+                    </div>
                   </div>
                 </div>
-                
-                <button
-                  className="btn w-100 fw-semibold"
-                  onClick={() => openBidModal(item)}
-                  disabled={item.timeLeft === 'Ended'}
-                  style={{
-                    background: item.timeLeft === 'Ended' ? '#cbd5e0' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    border: 'none',
-                    color: 'white',
-                    padding: '12px',
-                    borderRadius: '10px',
-                    transition: 'transform 0.2s ease',
-                    cursor: item.timeLeft === 'Ended' ? 'not-allowed' : 'pointer'
-                  }}
-                  onMouseOver={(e) => {
-                    if (item.timeLeft !== 'Ended') {
-                      e.target.style.transform = 'translateY(-2px)';
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    e.target.style.transform = 'translateY(0)';
-                  }}
-                >
-                  {item.timeLeft === 'Ended' ? 'Auction Ended' : 'Place Bid'}
-                </button>
               </div>
-            </div>
+            </Link>
           </div>
         ))}
       </div>
       
       {bidModal.open && (
         <div className="modal show d-block" style={{ 
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          backdropFilter: 'blur(5px)'
+          backgroundColor: 'rgba(0,0,0,0.5)'
         }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content" style={{ borderRadius: '20px', border: 'none' }}>
@@ -241,7 +204,7 @@ const AuctionItemList = () => {
                     <div style={{ 
                       width: '60px', 
                       height: '60px', 
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background: '#667eea',
                       borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',
@@ -342,4 +305,4 @@ const AuctionItemList = () => {
   );
 };
 
-export default Auction
+export default AuctionItemList

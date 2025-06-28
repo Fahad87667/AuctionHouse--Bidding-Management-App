@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Login = () => {
-  const [identifier, setIdentifier] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -17,7 +17,7 @@ const Login = () => {
     setError('');
     setLoading(true);
 
-    const result = await login(identifier, password);
+    const result = await login(email, password);
     
     if (result.success) {
       navigate('/');
@@ -28,13 +28,8 @@ const Login = () => {
     setLoading(false);
   };
 
-  const handleAdminLogin = () => {
-    setIdentifier('admin');
-    setPassword('Admin123');
-  };
-
   return (
-    <Container className="py-5" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
+    <Container className="py-5" style={{ minHeight: '100vh', background: '#f5f7fa' }}>
       <Row className="justify-content-center align-items-center" style={{ minHeight: '85vh' }}>
         <Col md={8} lg={6} xl={5}>
           <Card className="shadow-lg border-0" style={{ borderRadius: '20px', overflow: 'hidden' }}>
@@ -45,13 +40,12 @@ const Login = () => {
                   <div style={{ 
                     width: '80px', 
                     height: '80px', 
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: '#667eea',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    margin: '0 auto',
-                    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+                    margin: '0 auto'
                   }}>
                     <i className="fas fa-lock text-white" style={{ fontSize: '32px' }}></i>
                   </div>
@@ -73,24 +67,17 @@ const Login = () => {
               )}
 
               <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-4">
+                <Form.Group className="mb-4" controlId="formEmail">
                   <Form.Label className="fw-semibold text-secondary mb-2">
-                    <i className="fas fa-user me-2"></i>Username or Email
+                    <i className="fas fa-envelope me-2"></i>Email
                   </Form.Label>
                   <Form.Control
-                    type="text"
-                    value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="Enter your username or email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     required
-                    style={{ 
-                      borderRadius: '12px', 
-                      padding: '12px 16px',
-                      border: '1.5px solid #e2e8f0',
-                      fontSize: '16px',
-                      transition: 'all 0.3s ease'
-                    }}
-                    className="shadow-sm"
+                    style={{ borderRadius: '12px', padding: '14px', fontSize: '16px' }}
                   />
                 </Form.Group>
 
@@ -121,12 +108,11 @@ const Login = () => {
                   className="w-100 mb-4 fw-semibold border-0"
                   disabled={loading}
                   style={{ 
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    background: '#667eea',
                     borderRadius: '12px',
                     padding: '14px',
                     fontSize: '16px',
-                    transition: 'transform 0.2s ease',
-                    boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+                    transition: 'transform 0.2s ease'
                   }}
                   onMouseOver={(e) => !loading && (e.target.style.transform = 'translateY(-2px)')}
                   onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
@@ -159,40 +145,6 @@ const Login = () => {
                 }}>
                   or continue with
                 </span>
-              </div>
-
-              <Button
-                size="lg"
-                className="w-100 mb-3 fw-semibold"
-                onClick={handleAdminLogin}
-                style={{ 
-                  background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '14px',
-                  fontSize: '16px',
-                  transition: 'transform 0.2s ease',
-                  boxShadow: '0 4px 15px rgba(240, 147, 251, 0.3)'
-                }}
-                onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
-                onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
-              >
-                <i className="fas fa-user-shield me-2"></i>
-                Quick Admin Access
-              </Button>
-              
-              <div className="text-center mb-4">
-                <div style={{ 
-                  background: '#f7fafc', 
-                  padding: '12px', 
-                  borderRadius: '10px',
-                  border: '1px dashed #cbd5e0'
-                }}>
-                  <small className="text-muted">
-                    <i className="fas fa-info-circle me-1"></i>
-                    Admin: <code style={{ color: '#5a67d8' }}>admin / Admin123</code>
-                  </small>
-                </div>
               </div>
 
               <div className="text-center">

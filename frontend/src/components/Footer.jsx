@@ -7,7 +7,7 @@ const Footer = () => {
 
   return (
     <footer style={{ 
-      background: 'linear-gradient(135deg, #1a202c 0%, #2d3748 100%)',
+      background: '#1a202c',
       color: 'white',
       marginTop: '80px',
       position: 'relative',
@@ -31,13 +31,12 @@ const Footer = () => {
                 <div style={{
                   width: '50px',
                   height: '50px',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: '#667eea',
                   borderRadius: '12px',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginRight: '15px',
-                  boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+                  marginRight: '15px'
                 }}>
                   <i className="fas fa-gavel text-white fs-5"></i>
                 </div>

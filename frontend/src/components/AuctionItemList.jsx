@@ -170,105 +170,79 @@ const AuctionItemList = () => {
         <Row className="g-4">
           {auctions.map((auction) => (
             <Col key={auction.id} lg={4} md={6}>
-              <Card 
-                className="h-100 border-0"
-                style={{ 
-                  borderRadius: '20px',
-                  overflow: 'hidden',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.08)'
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-8px)';
-                  e.currentTarget.style.boxShadow = '0 12px 30px rgba(0,0,0,0.15)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.08)';
-                }}
-              >
-                <div style={{ position: 'relative', height: '220px', overflow: 'hidden' }}>
-                  <Card.Img
-                    variant="top"
-                    src={auction.imageUrl || 'https://via.placeholder.com/300x200?text=Auction+Item'}
-                    style={{ 
-                      height: '100%', 
-                      width: '100%',
-                      objectFit: 'cover',
-                      transition: 'transform 0.3s ease'
-                    }}
-                    onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
-                    onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
-                  />
-                  <div style={{ position: 'absolute', top: '12px', right: '12px' }}>
-                    {getStatusBadge(auction.endTime)}
+              <Link to={`/auction/${auction.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}>
+                <Card 
+                  className="h-100 border-0"
+                  style={{ 
+                    borderRadius: '20px',
+                    overflow: 'hidden',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    minHeight: '420px',
+                    background: '#fff'
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#f7fafc', overflow: 'hidden' }}>
+                    <Card.Img
+                      variant="top"
+                      src={auction.imageUrl ? (auction.imageUrl.startsWith('http') ? auction.imageUrl : `http://localhost:5100${auction.imageUrl}`) : '/images/no-image.png'}
+                      onError={e => { e.target.onerror = null; e.target.src = '/images/no-image.png'; }}
+                      style={{ 
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        transition: 'transform 0.3s ease',
+                        borderRadius: 0
+                      }}
+                      onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+                      onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+                    />
+                    <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 2 }}>
+                      {getStatusBadge(auction.endTime)}
+                    </div>
                   </div>
-                </div>
-                
-                <Card.Body className="p-4 d-flex flex-column">
-                  <Card.Title className="fw-bold mb-2" style={{ color: '#2d3748', fontSize: '20px' }}>
-                    {auction.title}
-                  </Card.Title>
-                  
-                  <Card.Text className="text-muted mb-3" style={{ fontSize: '14px' }}>
-                    {auction.description?.substring(0, 100)}...
-                  </Card.Text>
-                  
-                  <div className="mt-auto">
-                    <div className="p-3 mb-3" style={{ background: '#f7fafc', borderRadius: '12px' }}>
+                  <Card.Body style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '1.5rem' }}>
+                    <div>
+                      <h5 className="fw-bold mb-2" style={{ color: '#2d3748', fontSize: '1.25rem', lineHeight: 1.2 }}>{auction.title}</h5>
+                      <p className="text-muted mb-3" style={{ fontSize: '1rem', lineHeight: 1.4, minHeight: '2.5em', maxHeight: '2.5em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{auction.description}</p>
+                    </div>
+                    <div style={{ background: '#f7fafc', borderRadius: '12px', padding: '1rem', marginTop: 'auto' }}>
                       <div className="d-flex justify-content-between align-items-center mb-2">
-                        <span className="text-muted small">Current Bid</span>
-                        <span className="fw-bold fs-5" style={{ color: '#667eea' }}>
-                          {auction.highestBid !== null && auction.highestBid !== undefined
-                            ? '₹' + Number(auction.highestBid).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                        <span className="text-muted">Current Bid:</span>
+                        <span className="fs-5 fw-bold" style={{ color: '#667eea' }}>
+                          ₹{auction.highestBid !== null && auction.highestBid !== undefined
+                            ? Number(auction.highestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                             : (auction.startingPrice !== null && auction.startingPrice !== undefined
-                                ? '₹' + Number(auction.startingPrice).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                                : '₹0.00')}
+                                ? Number(auction.startingPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                : '0.00')}
                         </span>
                       </div>
                       <div className="d-flex justify-content-between align-items-center">
+                        <span className="text-muted"><i className="fas fa-users me-1"></i>{auction.bidCount} bids</span>
+                        <span className="text-muted"><i className="fas fa-clock me-1"></i>{formatTimeLeft(auction.endTime)}</span>
+                      </div>
+                      <div className="mt-2 text-center" style={{ background: '#e6fffa', borderRadius: '8px', padding: '0.5em 0' }}>
                         <small className="text-muted">
-                          <i className="fas fa-users me-1"></i>
-                          {auction.bidCount} bids
-                        </small>
-                        <small className="text-muted">
-                          <i className="fas fa-clock me-1"></i>
-                          {formatTimeLeft(auction.endTime)}
+                          <i className="fas fa-trophy text-success me-1"></i>
+                          Leading: <span className="fw-semibold">
+                            {auction.winningUser && auction.highestBid ? (
+                              <>
+                                {auction.winningUser} <span style={{ color: '#667eea' }}>
+                                  (₹{Number(auction.highestBid).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                                </span>
+                              </>
+                            ) : 'No bids yet'}
+                          </span>
                         </small>
                       </div>
                     </div>
-                    
-                    {auction.winningUser && (
-                      <div className="text-center mb-3 p-2" style={{ background: '#e6fffa', borderRadius: '8px' }}>
-                        <small className="text-success fw-semibold">
-                          <i className="fas fa-trophy me-1"></i>
-                          Leading: {auction.winningUser}
-                        </small>
-                      </div>
-                    )}
-                    
-                    {!isAdmin && (
-                      <Button
-                        as={Link}
-                        to={`/auction/${auction.id}`}
-                        className="w-100 fw-semibold border-0"
-                        style={{
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          padding: '12px',
-                          borderRadius: '12px',
-                          transition: 'transform 0.2s ease',
-                          boxShadow: '0 4px 15px rgba(102, 126, 234, 0.2)'
-                        }}
-                        onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                        onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                      >
-                        <i className="fas fa-eye me-2"></i>
-                        View Auction
-                      </Button>
-                    )}
-                  </div>
-                </Card.Body>
-              </Card>
+                  </Card.Body>
+                </Card>
+              </Link>
             </Col>
           ))}
         </Row>

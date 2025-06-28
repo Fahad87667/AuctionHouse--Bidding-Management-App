@@ -19,6 +19,8 @@ const AdminDashboard = () => {
     imageUrl: '',
     endTime: ''
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [activeTab, setActiveTab] = useState('summary');
 
   useEffect(() => {
@@ -39,6 +41,16 @@ const AdminDashboard = () => {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setImageFile(file);
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+    } else {
+      setImagePreview(null);
     }
   };
 
@@ -72,13 +84,28 @@ const AdminDashboard = () => {
       return;
     }
     
+    let imageUrl = formData.imageUrl?.trim() || '';
+    if (imageFile) {
+      const uploadData = new FormData();
+      uploadData.append('image', imageFile);
+      try {
+        const uploadRes = await axios.post('http://localhost:5100/api/auctionitems/upload-image', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        imageUrl = uploadRes.data.imageUrl;
+      } catch (uploadErr) {
+        setError(uploadErr.response?.data || 'Image upload failed');
+        return;
+      }
+    }
+    
     try {
       // Format the data properly for the backend
       const auctionData = {
         title: formData.title.trim(),
         description: formData.description.trim(),
         startingPrice: parseFloat(formData.startingPrice),
-        imageUrl: formData.imageUrl?.trim() || '',
+        imageUrl,
         endTime: endDate.toISOString()
       };
 
@@ -89,6 +116,8 @@ const AdminDashboard = () => {
       console.error('Error adding auction:', error.response?.data || error.message);
       setError(error.response?.data || 'Failed to add auction');
     }
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const handleEditAuction = async (e) => {
@@ -121,6 +150,21 @@ const AdminDashboard = () => {
       return;
     }
     
+    let imageUrl = formData.imageUrl?.trim() || '';
+    if (imageFile) {
+      const uploadData = new FormData();
+      uploadData.append('image', imageFile);
+      try {
+        const uploadRes = await axios.post('http://localhost:5100/api/auctionitems/upload-image', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        imageUrl = uploadRes.data.imageUrl;
+      } catch (uploadErr) {
+        setError(uploadErr.response?.data || 'Image upload failed');
+        return;
+      }
+    }
+    
     try {
       // Format the data properly for the backend
       const auctionData = {
@@ -128,7 +172,7 @@ const AdminDashboard = () => {
         title: formData.title.trim(),
         description: formData.description.trim(),
         startingPrice: parseFloat(formData.startingPrice),
-        imageUrl: formData.imageUrl?.trim() || '',
+        imageUrl,
         endTime: endDate.toISOString()
       };
 
@@ -139,6 +183,8 @@ const AdminDashboard = () => {
       console.error('Error updating auction:', error.response?.data || error.message);
       setError(error.response?.data || 'Failed to update auction');
     }
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const handleDeleteAuction = async (id) => {
@@ -156,6 +202,8 @@ const AdminDashboard = () => {
     setShowAddModal(false);
     setError('');
     setFormData({ title: '', description: '', startingPrice: '', imageUrl: '', endTime: '' });
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const handleCloseEditModal = () => {
@@ -163,6 +211,8 @@ const AdminDashboard = () => {
     setSelectedAuction(null);
     setError('');
     setFormData({ title: '', description: '', startingPrice: '', imageUrl: '', endTime: '' });
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const openEditModal = (auction) => {
@@ -270,13 +320,12 @@ const AdminDashboard = () => {
           <div style={{ 
             width: '80px', 
             height: '80px', 
-            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            background: '#f093fb',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            margin: '0 auto',
-            boxShadow: '0 4px 15px rgba(240, 147, 251, 0.3)'
+            margin: '0 auto'
           }}>
             <i className="fas fa-crown text-white" style={{ fontSize: '32px' }}></i>
           </div>
@@ -393,7 +442,7 @@ const AdminDashboard = () => {
                         <td className="py-3 px-4">
                           <div className="d-flex align-items-center">
                             <img
-                              src={auction.imageUrl || 'https://via.placeholder.com/48x48?text=No+Image'}
+                              src={auction.imageUrl ? (auction.imageUrl.startsWith('http') ? auction.imageUrl : `http://localhost:5100${auction.imageUrl}`) : '/images/no-image.png'}
                               alt={auction.title}
                               style={{
                                 width: '40px',
@@ -404,6 +453,7 @@ const AdminDashboard = () => {
                                 border: '1px solid #e2e8f0',
                                 marginRight: '12px'
                               }}
+                              onError={e => { e.target.onerror = null; e.target.src = '/images/no-image.png'; }}
                             />
                             <span className="fw-semibold">{auction.title}</span>
                           </div>
@@ -715,18 +765,25 @@ const AdminDashboard = () => {
             </Row>
             <Form.Group className="mb-4">
               <Form.Label className="fw-semibold text-secondary">
-                <i className="fas fa-image me-2"></i>Image URL (Optional)
+                <i className="fas fa-image me-2"></i>Image (Required)
               </Form.Label>
               <Form.Control
-                type="url"
-                value={formData.imageUrl}
-                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                style={{ 
-                  borderRadius: '10px', 
-                  border: '1.5px solid #e2e8f0',
-                  padding: '12px'
-                }}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                required
+                style={{ borderRadius: '10px', border: '1.5px solid #e2e8f0', padding: '12px' }}
               />
+              {imagePreview && (
+                <div className="mt-2 text-center">
+                  <img src={imagePreview} alt="Preview" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '10px', border: '1px solid #e2e8f0' }} />
+                </div>
+              )}
+              {!imagePreview && formData.imageUrl && (
+                <div className="mt-2 text-center">
+                  <img src={formData.imageUrl} alt="Current" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '10px', border: '1px solid #e2e8f0' }} />
+                </div>
+              )}
             </Form.Group>
           </Modal.Body>
           <Modal.Footer style={{ borderTop: '1px solid #f0f4f8' }}>
@@ -850,18 +907,25 @@ const AdminDashboard = () => {
             </Row>
             <Form.Group className="mb-4">
               <Form.Label className="fw-semibold text-secondary">
-                <i className="fas fa-image me-2"></i>Image URL (Optional)
+                <i className="fas fa-image me-2"></i>Image (Required)
               </Form.Label>
               <Form.Control
-                type="url"
-                value={formData.imageUrl}
-                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                style={{ 
-                  borderRadius: '10px', 
-                  border: '1.5px solid #e2e8f0',
-                  padding: '12px'
-                }}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                required
+                style={{ borderRadius: '10px', border: '1.5px solid #e2e8f0', padding: '12px' }}
               />
+              {imagePreview && (
+                <div className="mt-2 text-center">
+                  <img src={imagePreview} alt="Preview" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '10px', border: '1px solid #e2e8f0' }} />
+                </div>
+              )}
+              {!imagePreview && formData.imageUrl && (
+                <div className="mt-2 text-center">
+                  <img src={formData.imageUrl} alt="Current" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '10px', border: '1px solid #e2e8f0' }} />
+                </div>
+              )}
             </Form.Group>
           </Modal.Body>
           <Modal.Footer style={{ borderTop: '1px solid #f0f4f8' }}>

@@ -27,8 +27,9 @@ const AuctionItemDetail = () => {
     try {
       setLoading(true);
       const auctionResponse = await axios.get(`http://localhost:5100/api/auctionitems/${id}`);
+      console.log('Auction API Response:', auctionResponse.data);
       setAuction(auctionResponse.data);
-      setBids(auctionResponse.data.Bids || []);
+      setBids(auctionResponse.data.Bids || auctionResponse.data.bids || []);
       updateTimeLeft();
     } catch (error) {
       setError('Failed to load auction details');
@@ -224,7 +225,7 @@ const AuctionItemDetail = () => {
           <Card className="border-0 shadow-sm" style={{ borderRadius: '20px', overflow: 'hidden' }}>
             <div style={{ position: 'relative', height: '450px', overflow: 'hidden' }}>
               <img
-                src={auction.imageUrl || 'https://via.placeholder.com/600x400?text=Auction+Item'}
+                src={auction.imageUrl ? (auction.imageUrl.startsWith('http') ? auction.imageUrl : `http://localhost:5100${auction.imageUrl}`) : '/images/no-image.png'}
                 alt={auction.title}
                 style={{ 
                   width: '100%', 
@@ -232,6 +233,7 @@ const AuctionItemDetail = () => {
                   objectFit: 'cover',
                   transition: 'transform 0.3s ease'
                 }}
+                onError={e => { e.target.onerror = null; e.target.src = '/images/no-image.png'; }}
                 onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
                 onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
               />
@@ -419,102 +421,57 @@ const AuctionItemDetail = () => {
         </Col>
 
         <Col lg={4}>
-          <Card className="border-0 shadow-sm" style={{ borderRadius: '20px' }}>
-            <Card.Header 
-              className="bg-white border-0 p-4" 
-              style={{ 
-                borderBottom: '1px solid #f0f4f8',
-                borderRadius: '20px 20px 0 0'
-              }}
-            >
-              <h5 className="mb-0 fw-bold" style={{ color: '#2d3748' }}>
+          <Card className="border-0 shadow-sm mb-4" style={{ borderRadius: '20px' }}>
+            <Card.Body className="p-4">
+              <h5 className="fw-bold mb-3" style={{ color: '#2d3748' }}>
                 <i className="fas fa-history me-2" style={{ color: '#667eea' }}></i>
                 Bid History
               </h5>
-            </Card.Header>
-            <Card.Body className="p-0">
-              {bids.length === 0 ? (
-                <div className="text-center py-5">
-                  <i className="fas fa-gavel text-muted mb-3" style={{ fontSize: '3rem' }}></i>
-                  <p className="text-muted">No bids placed yet</p>
-                  <small className="text-muted">Be the first to bid!</small>
-                </div>
-              ) : (
+              {bids.length > 0 ? (
                 <ListGroup variant="flush">
-                  {bids.slice(0, 10).map((bid, index) => (
-                    <ListGroup.Item 
-                      key={bid.id} 
-                      className="border-0 px-4 py-3"
-                      style={{ 
-                        borderBottom: index < bids.length - 1 ? '1px solid #f0f4f8' : 'none',
-                        background: index === 0 ? '#f0f9ff' : 'transparent'
-                      }}
-                    >
-                      <div className="d-flex align-items-center">
-                        <div style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          background: index === 0 
-                            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
-                            : '#e2e8f0',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          marginRight: '12px'
-                        }}>
-                          <i className={`fas fa-user text-white`}></i>
+                  {bids.slice(0, 3).map((bid, index) => {
+                    const bidId = bid.Id ?? bid.id ?? index;
+                    const userName = bid.UserName ?? bid.userName ?? `User #${bid.UserId ?? bid.userId ?? 'Unknown'}`;
+                    const amount = bid.Amount ?? bid.amount;
+                    const timestamp = bid.Timestamp ?? bid.timestamp;
+                    return (
+                      <ListGroup.Item 
+                        key={bidId}
+                        className="border-0 px-0 py-3 bid-history-item"
+                        style={{ background: 'transparent', borderBottom: index !== bids.slice(0, 3).length - 1 ? '1px solid #f0f4f8' : 'none', transition: 'background 0.2s' }}
+                      >
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                          <span className="fw-semibold" style={{ color: '#2d3748', fontSize: '1.08em' }}>
+                            {userName}
+                          </span>
+                          <span className="fw-bold" style={{ color: '#5a67d8', fontSize: '1.15em', letterSpacing: '0.5px' }}>
+                            ₹{amount !== undefined ? Number(amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'N/A'}
+                          </span>
                         </div>
-                        <div className="flex-grow-1">
-                          <div className="d-flex justify-content-between align-items-start">
-                            <div>
-                              <span className="fw-semibold" style={{ color: '#2d3748' }}>
-                                {bid.userName || `User #${bid.userId}`}
-                              </span>
-                              {index === 0 && (
-                                <Badge 
-                                  className="ms-2"
-                                  style={{ 
-                                    background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
-                                    fontSize: '11px',
-                                    padding: '4px 8px',
-                                    borderRadius: '12px'
-                                  }}
-                                >
-                                  Leading
-                                </Badge>
-                              )}
-                              <small className="d-block text-muted mt-1">
-                                {new Date(bid.timestamp).toLocaleString()}
-                              </small>
-                            </div>
-                            <span className="fw-bold" style={{ 
-                              color: index === 0 ? '#667eea' : '#4a5568',
-                              fontSize: '18px'
-                            }}>
-                              {`₹${bid.amount.toLocaleString('en-IN', { 
-                                minimumFractionDigits: 2, 
-                                maximumFractionDigits: 2 
-                              })}`}
-                            </span>
-                          </div>
+                        <div className="text-muted small" style={{ fontSize: '0.97em' }}>
+                          {timestamp ? new Date(timestamp).toLocaleString('en-IN', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                          }) : 'Invalid Date'}
                         </div>
-                      </div>
-                    </ListGroup.Item>
-                  ))}
+                      </ListGroup.Item>
+                    );
+                  })}
                 </ListGroup>
-              )}
-              {bids.length > 10 && (
-                <div className="text-center p-3" style={{ borderTop: '1px solid #f0f4f8' }}>
-                  <small className="text-muted">
-                    Showing latest 10 of {bids.length} bids
-                  </small>
+              ) : (
+                <div className="text-center py-3">
+                  <i className="fas fa-inbox text-muted mb-2" style={{ fontSize: '2rem' }}></i>
+                  <p className="text-muted mb-0">No bids placed yet</p>
                 </div>
               )}
             </Card.Body>
           </Card>
 
-          {auction.winningUser && (
+          {auction.winningUser && auction.highestBid ? (
             <Card className="border-0 shadow-sm mt-3" style={{ borderRadius: '20px' }}>
               <Card.Body className="text-center p-4">
                 <div style={{
@@ -530,7 +487,31 @@ const AuctionItemDetail = () => {
                   <i className="fas fa-trophy text-white fs-4"></i>
                 </div>
                 <h6 className="fw-bold mb-1" style={{ color: '#2d3748' }}>Current Leader</h6>
-                <p className="mb-0 text-muted">{auction.winningUser}</p>
+                <p className="mb-0 text-muted">
+                  {auction.winningUser} <br/>
+                  <span className="fw-bold" style={{ color: '#667eea', fontSize: '1.2em' }}>
+                    ₹{Number(auction.highestBid).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </p>
+              </Card.Body>
+            </Card>
+          ) : (
+            <Card className="border-0 shadow-sm mt-3" style={{ borderRadius: '20px' }}>
+              <Card.Body className="text-center p-4">
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px'
+                }}>
+                  <i className="fas fa-trophy text-white fs-4"></i>
+                </div>
+                <h6 className="fw-bold mb-1" style={{ color: '#2d3748' }}>Current Leader</h6>
+                <p className="mb-0 text-muted">No bids yet</p>
               </Card.Body>
             </Card>
           )}
