@@ -1,43 +1,66 @@
-# Auction House
+# DotNetProject
 
-A modern full-stack online auction platform built with ASP.NET Core Web API (backend) and React (frontend).
+A modern Auction Platform built with a .NET (C#) backend and a React frontend.
 
-## Features
-- User registration and login (JWT authentication)
-- Role-based access (Admin/User)
-- Create, edit, and delete auction items (Admin)
-- Place bids on auction items (User)
-- View live and past auctions
-- Responsive, modern UI with React-Bootstrap
+## 🚀 Project Overview
+- **Backend:** ASP.NET Core Web API (C#)
+- **Frontend:** React (JavaScript)
+- **Database:** MySql
+- **Features:**
+  - User registration, login, and role-based access (Admin/User)
+  - Create, edit, and delete auctions (Admin)
+  - Place bids and view bid history (User)
+  - Secure image upload and local storage
+  - Responsive, modern UI
 
-## Getting Started
+## 📁 Folder Structure
+```
+DotNetProject/
+  backend/    # .NET backend (API, models, DB, controllers)
+  frontend/   # React frontend (UI, components, context)
+  README.md   # This file
+  Web.config  # IIS/ASP.NET config
+```
 
-### Backend (ASP.NET Core)
-1. Navigate to `backend/`.
-2. Configure your database connection in `appsettings.json`.
-3. Run migrations and start the API:
-   ```sh
-   dotnet ef database update
-   dotnet run
-   ```
+## ⚙️ Setup Instructions
 
-### Frontend (React)
-1. Navigate to `frontend/`.
-2. Install dependencies:
-   ```sh
-   npm install
-   ```
-3. Start the development server:
-   ```sh
-   npm start
-   ```
+### 1. Backend (.NET)
+```bash
+cd backend
+# Restore dependencies
+ dotnet restore
+# Run the API server
+ dotnet run
+# (Optional) Apply DB migrations
+ dotnet ef database update
+```
 
-### Environment Variables
-- Place any sensitive or environment-specific variables in a `.env` file (see `.gitignore`).
+### 2. Frontend (React)
+```bash
+cd frontend
+# Install dependencies
+ npm install
+# Start the React app
+ npm start
+```
 
-### Git Ignore
-- Build artifacts, logs, database files, and environment files are excluded from version control. See `.gitignore` for details.
+- The backend runs on `http://localhost:5100` by default.
+- The frontend runs on `http://localhost:3000` by default.
+
+## 📝 Usage
+- Register as a user or login as admin (`admin@auction.com` by default)
+- Admins can create, edit, and delete auctions (image required)
+- Users can view auctions, place bids, and see their bid history
+- All images are stored locally in the backend's `wwwroot/images/` folder
+
+## 💡 Notes
+- Make sure both backend and frontend are running for full functionality
+- Update connection strings and secrets in `backend/appsettings.json` as needed
+- For development, use sample images in `frontend/public/images/` and `backend/wwwroot/images/`
+
+## 📚 More Info
+- For detailed technical notes (in Hinglish), see `NOTES.md`
 
 ---
 
-For any issues or contributions, please open an issue or pull request. 
+Happy Bidding! 
