@@ -1,8 +1,10 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public class Payment
 {
     public int Id { get; set; }
+    [Column("AuctionItemId")]
     public int AuctionId { get; set; }
     public string UserId { get; set; }
     public decimal Amount { get; set; }
