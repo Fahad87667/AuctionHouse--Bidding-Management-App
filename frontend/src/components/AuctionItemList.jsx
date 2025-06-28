@@ -14,6 +14,7 @@ const AuctionItemList = () => {
     user.role === 'Admin' ||
     (user.roles && user.roles.includes('Admin'))
   );
+  const userId = window.localStorage.getItem('userId');
 
   useEffect(() => {
     fetchAuctions();
@@ -32,6 +33,12 @@ const AuctionItemList = () => {
     }
   };
 
+  // Filter auctions for users: hide ended or completed auctions
+  const filteredAuctions = auctions.filter(auction => {
+    const isEnded = new Date(auction.endTime) <= new Date();
+    return !auction.isCompleted && !auction.isPaid && !isEnded;
+  });
+
   const formatTimeLeft = (endTime) => {
     const now = new Date();
     const end = new Date(endTime);
@@ -49,36 +56,44 @@ const AuctionItemList = () => {
     return parts.join(', ') + ' left';
   };
 
-  const getStatusBadge = (endTime) => {
+  const getStatusBadge = (auction) => {
     const now = new Date();
-    const end = new Date(endTime);
+    const end = new Date(auction.endTime);
     const diff = end - now;
-
-    if (diff <= 0) {
+    const isWinner = auction.isCompleted && auction.winnerUserId && userId && auction.winnerUserId === userId;
+    if (auction.isCompleted || auction.isPaid || diff <= 0) {
       return <Badge style={{ 
-        background: '#e2e8f0', 
-        color: '#718096',
-        padding: '6px 12px',
-        borderRadius: '20px',
-        fontWeight: '600'
+        background: '#ff4d4f', // Strong red for ended/won
+        color: '#fff',
+        padding: '8px 16px',
+        borderRadius: '25px',
+        fontWeight: '700',
+        fontSize: '14px',
+        boxShadow: '0 2px 8px rgba(255,77,79,0.08)'
       }}>
-        <i className="fas fa-times-circle me-1"></i>Ended
+        <i className="fas fa-trophy me-1"></i>{isWinner ? 'Won' : 'Ended'}
       </Badge>;
-    } else if (diff < 1000 * 60 * 60) { // Less than 1 hour
+    } else if (diff < 1000 * 60 * 60) {
       return <Badge style={{ 
-        background: 'linear-gradient(135deg, #f56565 0%, #e53e3e 100%)',
-        padding: '6px 12px',
-        borderRadius: '20px',
-        fontWeight: '600'
+        background: 'linear-gradient(135deg, #fbbf24 0%, #f59e42 100%)', // Orange for ending soon
+        color: '#222',
+        padding: '8px 16px',
+        borderRadius: '25px',
+        fontWeight: '700',
+        fontSize: '14px',
+        boxShadow: '0 2px 8px rgba(251,191,36,0.08)'
       }}>
         <i className="fas fa-clock me-1"></i>Ending Soon
       </Badge>;
     } else {
       return <Badge style={{ 
         background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
-        padding: '6px 12px',
-        borderRadius: '20px',
-        fontWeight: '600'
+        color: '#fff',
+        padding: '8px 16px',
+        borderRadius: '25px',
+        fontWeight: '700',
+        fontSize: '14px',
+        boxShadow: '0 2px 8px rgba(72,187,120,0.08)'
       }}>
         <i className="fas fa-check-circle me-1"></i>Active
       </Badge>;
@@ -149,12 +164,12 @@ const AuctionItemList = () => {
             fontSize: '16px'
           }}>
             <i className="fas fa-fire me-2"></i>
-            {auctions.length} Active Auctions
+            {filteredAuctions.length} Active Auctions
           </span>
         </div>
       </div>
 
-      {auctions.length === 0 ? (
+      {filteredAuctions.length === 0 ? (
         <div className="text-center py-5">
           <div className="card border-0 shadow-sm mx-auto" style={{ maxWidth: '500px', borderRadius: '20px' }}>
             <div className="card-body p-5">
@@ -168,24 +183,10 @@ const AuctionItemList = () => {
         </div>
       ) : (
         <Row className="g-4">
-          {auctions.map((auction) => (
-            <Col key={auction.id} lg={4} md={6}>
-              <Link to={`/auction/${auction.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}>
-                <Card 
-                  className="h-100 border-0"
-                  style={{ 
-                    borderRadius: '20px',
-                    overflow: 'hidden',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    minHeight: '420px',
-                    background: '#fff'
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-                  onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                >
+          {filteredAuctions.map((auction) => (
+            <Col key={auction.id} md={6} lg={4}>
+              <Link to={`/auctions/${auction.id}`} style={{ textDecoration: 'none' }}>
+                <Card className="h-100 border-0 shadow-sm" style={{ borderRadius: '20px' }}>
                   <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#f7fafc', overflow: 'hidden' }}>
                     <Card.Img
                       variant="top"
@@ -202,7 +203,7 @@ const AuctionItemList = () => {
                       onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
                     />
                     <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 2 }}>
-                      {getStatusBadge(auction.endTime)}
+                      {getStatusBadge(auction)}
                     </div>
                   </div>
                   <Card.Body style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '1.5rem' }}>

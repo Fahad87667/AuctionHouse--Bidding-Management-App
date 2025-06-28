@@ -22,6 +22,7 @@ const AdminDashboard = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [activeTab, setActiveTab] = useState('summary');
+  const userId = window.localStorage.getItem('userId');
 
   useEffect(() => {
     fetchData();
@@ -78,8 +79,9 @@ const AdminDashboard = () => {
       return;
     }
     
-    const endDate = new Date(formData.endTime);
-    if (endDate <= new Date()) {
+    const endDateLocal = new Date(formData.endTime);
+    const endDateUTC = new Date(endDateLocal.getTime() - endDateLocal.getTimezoneOffset() * 60000);
+    if (endDateUTC <= new Date()) {
       setError('End time must be in the future');
       return;
     }
@@ -106,7 +108,7 @@ const AdminDashboard = () => {
         description: formData.description.trim(),
         startingPrice: parseFloat(formData.startingPrice),
         imageUrl,
-        endTime: endDate.toISOString()
+        endTime: endDateUTC.toISOString()
       };
 
       await axios.post('http://localhost:5100/api/auctionitems', auctionData);
@@ -144,8 +146,9 @@ const AdminDashboard = () => {
       return;
     }
     
-    const endDate = new Date(formData.endTime);
-    if (endDate <= new Date()) {
+    const endDateLocal = new Date(formData.endTime);
+    const endDateUTC = new Date(endDateLocal.getTime() - endDateLocal.getTimezoneOffset() * 60000);
+    if (endDateUTC <= new Date()) {
       setError('End time must be in the future');
       return;
     }
@@ -173,7 +176,7 @@ const AdminDashboard = () => {
         description: formData.description.trim(),
         startingPrice: parseFloat(formData.startingPrice),
         imageUrl,
-        endTime: endDate.toISOString()
+        endTime: endDateUTC.toISOString()
       };
 
       await axios.put(`http://localhost:5100/api/auctionitems/${selectedAuction.id}`, auctionData);
@@ -219,8 +222,9 @@ const AdminDashboard = () => {
     setSelectedAuction(auction);
     
     // Format the date for datetime-local input (YYYY-MM-DDTHH:MM)
-    const endDate = new Date(auction.endTime);
-    const formattedDate = endDate.toISOString().slice(0, 16); // Remove seconds and timezone
+    const endDateLocal = new Date(auction.endTime);
+    const endDateUTC = new Date(endDateLocal.getTime() - endDateLocal.getTimezoneOffset() * 60000);
+    const formattedDate = endDateUTC.toISOString().slice(0, 16); // Remove seconds and timezone
     
     setFormData({
       title: auction.title,
@@ -233,39 +237,55 @@ const AdminDashboard = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString();
+    const d = new Date(dateString);
+    return d.toLocaleString('en-IN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
   };
 
-  const getStatusBadge = (endTime) => {
+  const getStatusBadge = (auction) => {
     const now = new Date();
-    const end = new Date(endTime);
+    const end = new Date(auction.endTime);
     const diff = end - now;
-
-    if (diff <= 0) {
+    const isWinner = auction.isCompleted && auction.winnerUserId && userId && auction.winnerUserId === userId;
+    if (auction.isCompleted || auction.isPaid || diff <= 0) {
       return <Badge style={{ 
-        background: '#e2e8f0', 
-        color: '#718096',
-        padding: '6px 12px',
-        borderRadius: '20px',
-        fontWeight: '600'
+        background: '#ff4d4f', // Strong red for ended/won
+        color: '#fff',
+        padding: '8px 16px',
+        borderRadius: '25px',
+        fontWeight: '700',
+        fontSize: '14px',
+        boxShadow: '0 2px 8px rgba(255,77,79,0.08)'
       }}>
-        <i className="fas fa-times-circle me-1"></i>Ended
+        <i className="fas fa-trophy me-1"></i>{isWinner ? 'Won' : 'Ended'}
       </Badge>;
     } else if (diff < 1000 * 60 * 60) {
       return <Badge style={{ 
-        background: 'linear-gradient(135deg, #f56565 0%, #e53e3e 100%)',
-        padding: '6px 12px',
-        borderRadius: '20px',
-        fontWeight: '600'
+        background: 'linear-gradient(135deg, #fbbf24 0%, #f59e42 100%)',
+        color: '#222',
+        padding: '8px 16px',
+        borderRadius: '25px',
+        fontWeight: '700',
+        fontSize: '14px',
+        boxShadow: '0 2px 8px rgba(251,191,36,0.08)'
       }}>
         <i className="fas fa-clock me-1"></i>Ending Soon
       </Badge>;
     } else {
       return <Badge style={{ 
         background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
-        padding: '6px 12px',
-        borderRadius: '20px',
-        fontWeight: '600'
+        color: '#fff',
+        padding: '8px 16px',
+        borderRadius: '25px',
+        fontWeight: '700',
+        fontSize: '14px',
+        boxShadow: '0 2px 8px rgba(72,187,120,0.08)'
       }}>
         <i className="fas fa-check-circle me-1"></i>Active
       </Badge>;
@@ -395,7 +415,7 @@ const AdminDashboard = () => {
       <Tabs
         id="admin-dashboard-tabs"
         activeKey={activeTab}
-        onSelect={(k) => setActiveTab(k)}
+        onSelect={setActiveTab}
         className="mb-4"
         style={{
           borderBottom: 'none'
@@ -427,6 +447,7 @@ const AdminDashboard = () => {
                       <th className="border-0 py-3 px-4 fw-semibold text-secondary">Current Price</th>
                       <th className="border-0 py-3 px-4 fw-semibold text-secondary">Bids</th>
                       <th className="border-0 py-3 px-4 fw-semibold text-secondary">End Time</th>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">Winner</th>
                       <th className="border-0 py-3 px-4 fw-semibold text-secondary">Status</th>
                       <th className="border-0 py-3 px-4 fw-semibold text-secondary">Actions</th>
                     </tr>
@@ -478,7 +499,17 @@ const AdminDashboard = () => {
                             {formatDate(auction.endTime)}
                           </small>
                         </td>
-                        <td className="py-3 px-4">{getStatusBadge(auction.endTime)}</td>
+                        <td className="py-3 px-4">
+                          {(auction.isCompleted || new Date(auction.endTime) <= new Date())
+                            ? (
+                                auction.winnerUserName
+                                  || (auction.bids && auction.bids.length > 0
+                                      ? (auction.bids[0].UserName || auction.bids[0].userName || auction.bids[0].userEmail || auction.bids[0].UserEmail || '-')
+                                      : '-')
+                            )
+                            : '-'}
+                        </td>
+                        <td className="py-3 px-4">{getStatusBadge(auction)}</td>
                         <td className="py-3 px-4">
                           <Button
                             size="sm"
@@ -538,13 +569,13 @@ const AdminDashboard = () => {
         </Tab>
         
         <Tab 
-          eventKey="recent" 
+          eventKey="bids" 
           title={
             <span style={{ 
               padding: '10px 20px',
               borderRadius: '25px',
-              background: activeTab === 'recent' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
-              color: activeTab === 'recent' ? 'white' : '#667eea',
+              background: activeTab === 'bids' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
+              color: activeTab === 'bids' ? 'white' : '#667eea',
               fontWeight: '600',
               display: 'inline-block'
             }}>
@@ -727,7 +758,7 @@ const AdminDashboard = () => {
               <Col md={6}>
                 <Form.Group className="mb-4">
                   <Form.Label className="fw-semibold text-secondary">
-                    <i className="fas fa-rupee-sign me-2"></i>Starting Price
+                    <i className="fas fa-indian-rupee-sign me-2"></i>Starting Price
                   </Form.Label>
                   <Form.Control
                     type="number"
@@ -869,7 +900,7 @@ const AdminDashboard = () => {
               <Col md={6}>
                 <Form.Group className="mb-4">
                   <Form.Label className="fw-semibold text-secondary">
-                    <i className="fas fa-rupee-sign me-2"></i>Starting Price
+                    <i className="fas fa-indian-rupee-sign me-2"></i>Starting Price
                   </Form.Label>
                   <Form.Control
                     type="number"

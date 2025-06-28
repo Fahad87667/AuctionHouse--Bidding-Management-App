@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Alert, Spinner, Badge } from 'react-bootstrap';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const MyBids = () => {
   const [bids, setBids] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const [paying, setPaying] = useState(null);
+  const userId = window.localStorage.getItem('userId');
 
   useEffect(() => {
     const fetchBids = async () => {
@@ -113,10 +117,10 @@ const MyBids = () => {
                     <i className="fas fa-tag me-2"></i>Auction Item
                   </th>
                   <th className="border-0 py-3 px-4 fw-semibold text-secondary">
-                    <i className="fas fa-pound-sign me-2"></i>Bid Amount
+                    <i className="fas fa-indian-rupee-sign me-2"></i>Bid Amount
                   </th>
                   <th className="border-0 py-3 px-4 fw-semibold text-secondary">
-                    <i className="fas fa-clock me-2"></i>Placed On
+                    <i className="fas fa-clock me-2"></i>Ends On
                   </th>
                   <th className="border-0 py-3 px-4 fw-semibold text-secondary">
                     <i className="fas fa-info-circle me-2"></i>Status
@@ -124,78 +128,61 @@ const MyBids = () => {
                 </tr>
               </thead>
               <tbody>
-                {bids.map((bid, index) => (
-                  <tr 
-                    key={bid.id} 
-                    style={{ 
-                      transition: 'background 0.2s ease',
-                      borderBottom: index === bids.length - 1 ? 'none' : '1px solid #f0f4f8'
-                    }}
-                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <td className="py-4 px-4">
-                      <div className="d-flex align-items-center">
-                        <div style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '10px',
-                          background: '#e6f0ff',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          marginRight: '12px'
-                        }}>
-                          <i className="fas fa-gavel" style={{ color: '#667eea' }}></i>
+                {bids.map((bid, index) => {
+                  // Fallback: If auction is ended and this bid is the highest, show 'Won'
+                  const auctionEnded = bid.auctionEndTime && new Date(bid.auctionEndTime) <= new Date();
+                  const isUserHighest = bid.isWinning && auctionEnded;
+                  const isBackendWinner = (bid.isCompleted || bid.isPaid) && bid.winnerUserId && userId && bid.winnerUserId === userId;
+                  return (
+                    <tr 
+                      key={bid.id} 
+                      style={{ 
+                        transition: 'background 0.2s ease',
+                        borderBottom: index === bids.length - 1 ? 'none' : '1px solid #f0f4f8'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <td className="py-4 px-4">
+                        <div className="d-flex align-items-center">
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '10px',
+                            background: '#e6f0ff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginRight: '12px'
+                          }}>
+                            <i className="fas fa-gavel" style={{ color: '#667eea' }}></i>
+                          </div>
+                          <span className="fw-semibold" style={{ color: '#2d3748' }}>
+                            {bid.auctionTitle}
+                          </span>
                         </div>
-                        <span className="fw-semibold" style={{ color: '#2d3748' }}>
-                          {bid.auctionTitle}
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="fs-5 fw-bold" style={{ color: '#667eea' }}>
+                          {'₹' + Number(bid.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="fs-5 fw-bold" style={{ color: '#667eea' }}>
-                        {'₹' + Number(bid.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4 text-muted">
-                      <i className="far fa-calendar me-2"></i>
-                      {new Date(bid.timestamp).toLocaleString()}
-                    </td>
-                    <td className="py-4 px-4">
-                      {bid.isWinning ? (
-                        <Badge 
-                          bg="success"
-                          style={{
-                            padding: '8px 16px',
-                            borderRadius: '20px',
-                            fontSize: '13px',
-                            background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
-                            border: 'none'
-                          }}
-                        >
-                          <i className="fas fa-trophy me-1"></i>
-                          Winning
-                        </Badge>
-                      ) : (
-                        <Badge 
-                          bg="secondary"
-                          style={{
-                            padding: '8px 16px',
-                            borderRadius: '20px',
-                            fontSize: '13px',
-                            backgroundColor: '#e2e8f0',
-                            color: '#718096',
-                            border: 'none'
-                          }}
-                        >
-                          <i className="fas fa-minus-circle me-1"></i>
-                          Outbid
-                        </Badge>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="py-4 px-4 text-muted">
+                        <i className="far fa-calendar me-2"></i>
+                        {bid.auctionEndTime ? new Date(bid.auctionEndTime).toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A'}
+                      </td>
+                      <td className="py-4 px-4">
+                        {(isBackendWinner || isUserHighest) ? (
+                          <Badge style={{ padding: '8px 16px', borderRadius: '20px', fontSize: '13px', background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)', color: '#fff', fontWeight: '700', border: 'none' }}>Won</Badge>
+                        ) : bid.isWinning ? (
+                          <Badge style={{ padding: '8px 16px', borderRadius: '20px', fontSize: '13px', background: 'linear-gradient(135deg, #fbbf24 0%, #f59e42 100%)', color: '#222', fontWeight: '700', border: 'none' }}>Winning</Badge>
+                        ) : (
+                          <Badge style={{ padding: '8px 16px', borderRadius: '20px', fontSize: '13px',  background: 'linear-gradient(135deg, #dadada 0%, #dadada 100%)', color: '#222', fontWeight: '700', border: 'none' }}>Outbid</Badge>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </Table>
           </div>

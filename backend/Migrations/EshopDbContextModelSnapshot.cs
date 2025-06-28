@@ -29,6 +29,10 @@ namespace eshop_api.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AuctionStatus")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -39,6 +43,12 @@ namespace eshop_api.Migrations
                     b.Property<string>("ImageUrl")
                         .HasColumnType("longtext");
 
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsPaid")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<decimal>("StartingPrice")
                         .HasColumnType("decimal(65,30)");
 
@@ -46,6 +56,9 @@ namespace eshop_api.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
+
+                    b.Property<string>("WinnerUserId")
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -65,6 +78,10 @@ namespace eshop_api.Migrations
 
                     b.Property<int>("AuctionItemId")
                         .HasColumnType("int");
+
+                    b.Property<string>("BidStatus")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime(6)");
@@ -278,6 +295,47 @@ namespace eshop_api.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<int>("AuctionItemId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentMode")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("PaymentTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuctionItemId");
+
+                    b.ToTable("Payments");
+                });
+
             modelBuilder.Entity("Bid", b =>
                 {
                     b.HasOne("AuctionItem", "AuctionItem")
@@ -348,9 +406,22 @@ namespace eshop_api.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Payment", b =>
+                {
+                    b.HasOne("AuctionItem", "AuctionItem")
+                        .WithMany("Payments")
+                        .HasForeignKey("AuctionItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AuctionItem");
+                });
+
             modelBuilder.Entity("AuctionItem", b =>
                 {
                     b.Navigation("Bids");
+
+                    b.Navigation("Payments");
                 });
 #pragma warning restore 612, 618
         }

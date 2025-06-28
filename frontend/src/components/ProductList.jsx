@@ -9,6 +9,7 @@ const AuctionItemList = () => {
   const [bidModal, setBidModal] = useState({ open: false, item: null });
   const [bidAmount, setBidAmount] = useState('');
   const [bidError, setBidError] = useState('');
+  const userId = window.localStorage.getItem('userId');
 
   const fetchItems = useCallback(async () => {
     try {
@@ -63,6 +64,27 @@ const AuctionItemList = () => {
     }
   };
 
+  // Filter auctions for users: hide ended or completed auctions
+  const filteredItems = items.filter(item => {
+    const isEnded = new Date(item.endTime) <= new Date();
+    return !item.isCompleted && !item.isPaid && !isEnded;
+  });
+
+  // Update getStatusBadge for better color contrast
+  const getStatusBadge = (item) => {
+    const now = new Date();
+    const end = new Date(item.endTime);
+    const diff = end - now;
+    const isWinner = item.isCompleted && item.winnerUserId && userId && item.winnerUserId === userId;
+    if (item.isCompleted || item.isPaid || diff <= 0) {
+      return <span className="badge" style={{ background: '#ff4d4f', color: '#fff', padding: '8px 16px', borderRadius: '25px', fontWeight: '700', fontSize: '14px', boxShadow: '0 2px 8px rgba(255,77,79,0.08)' }}><i className="fas fa-trophy me-1"></i>{isWinner ? 'Won' : 'Ended'}</span>;
+    } else if (diff < 1000 * 60 * 60) {
+      return <span className="badge" style={{ background: 'linear-gradient(135deg, #fbbf24 0%, #f59e42 100%)', color: '#222', padding: '8px 16px', borderRadius: '25px', fontWeight: '700', fontSize: '14px', boxShadow: '0 2px 8px rgba(251,191,36,0.08)' }}><i className="fas fa-clock me-1"></i>Ending Soon</span>;
+    } else {
+      return <span className="badge" style={{ background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)', color: '#fff', padding: '8px 16px', borderRadius: '25px', fontWeight: '700', fontSize: '14px', boxShadow: '0 2px 8px rgba(72,187,120,0.08)' }}><i className="fas fa-check-circle me-1"></i>Active</span>;
+    }
+  };
+
   if (loading) return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
       <div style={{ textAlign: 'center' }}>
@@ -93,104 +115,103 @@ const AuctionItemList = () => {
         <p className="text-muted fs-5">Discover amazing items and place your bids</p>
       </div>
       
-      <div className="row g-4">
-        {items.map((item) => (
-          <div key={item.id} className="col-md-6 col-lg-4">
-            <Link to={`/auction/${item.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}>
-              <div className="card h-100 shadow-sm" style={{ 
-                borderRadius: '16px', 
-                overflow: 'hidden',
-                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                border: 'none',
-                display: 'flex',
-                flexDirection: 'column',
-                minHeight: '420px',
-                background: '#fff'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = 'translateY(-5px)';
-                e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 0.125rem 0.25rem rgba(0,0,0,0.075)';
-              }}>
-                <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#f7fafc', overflow: 'hidden' }}>
-                  <img
-                    src={item.imageUrl ? (item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5100${item.imageUrl}`) : '/images/no-image.png'}
-                    alt={item.title}
-                    className="card-img-top"
-                    style={{ 
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      transition: 'transform 0.3s ease',
-                      borderRadius: 0
-                    }}
-                    onError={e => { e.target.onerror = null; e.target.src = '/images/no-image.png'; }}
-                    onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
-                    onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
-                  />
-                  {item.timeLeft === 'Ended' && (
-                    <div style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: 'rgba(0,0,0,0.7)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      zIndex: 2
-                    }}>
-                      <span className="badge bg-danger fs-6 px-4 py-2" style={{ borderRadius: '20px' }}>
-                        AUCTION ENDED
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="card-body p-4 d-flex flex-column" style={{ flex: 1, justifyContent: 'space-between' }}>
-                  <div>
-                    <h5 className="card-title fw-bold mb-2" style={{ color: '#2d3748', fontSize: '1.25rem', lineHeight: 1.2 }}>{item.title}</h5>
-                    <p className="card-text text-muted mb-3" style={{ fontSize: '1rem', lineHeight: 1.4, minHeight: '2.5em', maxHeight: '2.5em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.description}</p>
-                  </div>
-                  <div style={{ background: '#f7fafc', borderRadius: '12px', padding: '1rem', marginTop: 'auto' }}>
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <span className="text-muted">Current Bid:</span>
-                      <span className="fs-5 fw-bold" style={{ color: '#667eea' }}>
-                        ₹{item.highestBid !== null && item.highestBid !== undefined
-                          ? Number(item.highestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                          : (item.startingPrice !== null && item.startingPrice !== undefined
-                              ? Number(item.startingPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                              : '0.00')}
-                      </span>
-                    </div>
-                    <div className="d-flex justify-content-between align-items-center">
-                      <span className="text-muted"><i className="fas fa-users me-1"></i>{item.bidCount} bids</span>
-                      <span className="text-muted"><i className="fas fa-clock me-1"></i>{item.timeLeft}</span>
-                    </div>
-                    <div className="mt-2 text-center" style={{ background: '#e6fffa', borderRadius: '8px', padding: '0.5em 0' }}>
-                      <small className="text-muted">
-                        <i className="fas fa-trophy text-success me-1"></i>
-                        Leading: <span className="fw-semibold">
-                          {item.winningUser && item.highestBid ? (
-                            <>
-                              {item.winningUser} <span style={{ color: '#667eea' }}>
-                                (₹{Number(item.highestBid).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
-                              </span>
-                            </>
-                          ) : 'No bids yet'}
-                        </span>
-                      </small>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
+      {filteredItems.length === 0 ? (
+        <div className="text-center py-5">
+          <div className="card border-0 shadow-sm mx-auto" style={{ maxWidth: '500px', borderRadius: '20px' }}>
+            <div className="card-body p-5">
+              <i className="fas fa-inbox text-muted mb-3" style={{ fontSize: '3rem' }}></i>
+              <h5 className="fw-bold mb-2" style={{ color: '#2d3748' }}>
+                No Active Auctions
+              </h5>
+              <p className="text-muted mb-0">Check back later for new auctions!</p>
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div className="row g-4">
+          {filteredItems.map((item) => (
+            <div key={item.id} className="col-md-6 col-lg-4">
+              <Link to={`/auction/${item.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block', height: '100%' }}>
+                <div className="card h-100 shadow-sm" style={{ 
+                  borderRadius: '16px', 
+                  overflow: 'hidden',
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                  border: 'none',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  minHeight: '420px',
+                  background: '#fff'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-5px)';
+                  e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 0.125rem 0.25rem rgba(0,0,0,0.075)';
+                }}>
+                  <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#f7fafc', overflow: 'hidden' }}>
+                    <img
+                      src={item.imageUrl ? (item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5100${item.imageUrl}`) : '/images/no-image.png'}
+                      alt={item.title}
+                      className="card-img-top"
+                      style={{ 
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        transition: 'transform 0.3s ease',
+                        borderRadius: 0
+                      }}
+                      onError={e => { e.target.onerror = null; e.target.src = '/images/no-image.png'; }}
+                      onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
+                      onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+                    />
+                    <div style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 2 }}>
+                      {getStatusBadge(item)}
+                    </div>
+                  </div>
+                  <div className="card-body p-4 d-flex flex-column" style={{ flex: 1, justifyContent: 'space-between' }}>
+                    <div>
+                      <h5 className="card-title fw-bold mb-2" style={{ color: '#2d3748', fontSize: '1.25rem', lineHeight: 1.2 }}>{item.title}</h5>
+                      <p className="card-text text-muted mb-3" style={{ fontSize: '1rem', lineHeight: 1.4, minHeight: '2.5em', maxHeight: '2.5em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.description}</p>
+                    </div>
+                    <div style={{ background: '#f7fafc', borderRadius: '12px', padding: '1rem', marginTop: 'auto' }}>
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <span className="text-muted">Current Bid:</span>
+                        <span className="fs-5 fw-bold" style={{ color: '#667eea' }}>
+                          ₹{item.highestBid !== null && item.highestBid !== undefined
+                            ? Number(item.highestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                            : (item.startingPrice !== null && item.startingPrice !== undefined
+                                ? Number(item.startingPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                : '0.00')}
+                        </span>
+                      </div>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <span className="text-muted"><i className="fas fa-users me-1"></i>{item.bidCount} bids</span>
+                        <span className="text-muted"><i className="fas fa-clock me-1"></i>{item.endTime ? new Date(item.endTime).toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A'}</span>
+                      </div>
+                      <div className="mt-2 text-center" style={{ background: '#e6fffa', borderRadius: '8px', padding: '0.5em 0' }}>
+                        <small className="text-muted">
+                          <i className="fas fa-trophy text-success me-1"></i>
+                          Leading: <span className="fw-semibold">
+                            {item.winningUser && item.highestBid ? (
+                              <>
+                                {item.winningUser} <span style={{ color: '#667eea' }}>
+                                  (₹{Number(item.highestBid).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                                </span>
+                              </>
+                            ) : 'No bids yet'}
+                          </span>
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
       
       {bidModal.open && (
         <div className="modal show d-block" style={{ 

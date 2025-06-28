@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using System.Linq;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -18,10 +19,24 @@ public class AuctionItemsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
+        var now = DateTime.UtcNow;
         var items = await _context.AuctionItems
             .Include(a => a.Bids)
             .ThenInclude(b => b.User)
             .ToListAsync();
+        foreach (var item in items)
+        {
+            if (!item.IsCompleted && item.EndTime <= now)
+            {
+                var winningBid = item.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
+                if (winningBid != null)
+                {
+                    item.WinnerUserId = winningBid.UserId;
+                }
+                item.IsCompleted = true;
+            }
+        }
+        await _context.SaveChangesAsync();
         var result = items.Select(item => new {
             item.Id,
             item.Title,
@@ -29,10 +44,24 @@ public class AuctionItemsController : ControllerBase
             item.ImageUrl,
             item.StartingPrice,
             item.EndTime,
+            item.IsCompleted,
+            item.IsPaid,
+            item.WinnerUserId,
+            WinnerUserName = item.Bids.FirstOrDefault(b => b.UserId == item.WinnerUserId)?.User?.UserName,
             HighestBid = item.Bids.OrderByDescending(b => b.Amount).FirstOrDefault()?.Amount ?? item.StartingPrice,
             BidCount = item.Bids.Count,
-            WinningUser = item.Bids.OrderByDescending(b => b.Amount).FirstOrDefault()?.User?.UserName,
-            TimeLeft = (item.EndTime - DateTime.UtcNow).TotalSeconds > 0 ? (item.EndTime - DateTime.UtcNow).ToString(@"hh\:mm\:ss") : "Ended"
+            Bids = item.Bids
+                .OrderByDescending(b => b.Amount)
+                .Take(1)
+                .Select(b => new {
+                    b.Id,
+                    b.Amount,
+                    b.Timestamp,
+                    b.UserId,
+                    UserName = b.User.UserName,
+                    UserEmail = b.User.Email
+                }),
+            TimeLeft = (item.EndTime - now).TotalSeconds > 0 ? (item.EndTime - now).ToString(@"hh\:mm\:ss") : "Ended"
         });
         return Ok(result);
     }
@@ -40,8 +69,19 @@ public class AuctionItemsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
     {
+        var now = DateTime.UtcNow;
         var item = await _context.AuctionItems.Include(a => a.Bids).ThenInclude(b => b.User).FirstOrDefaultAsync(a => a.Id == id);
         if (item == null) return NotFound();
+        if (!item.IsCompleted && item.EndTime <= now)
+        {
+            var winningBid = item.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
+            if (winningBid != null)
+            {
+                item.WinnerUserId = winningBid.UserId;
+            }
+            item.IsCompleted = true;
+            await _context.SaveChangesAsync();
+        }
         return Ok(new {
             item.Id,
             item.Title,
@@ -49,11 +89,14 @@ public class AuctionItemsController : ControllerBase
             item.ImageUrl,
             item.StartingPrice,
             item.EndTime,
+            item.IsCompleted,
+            item.IsPaid,
+            item.WinnerUserId,
+            WinnerUserName = item.Bids.FirstOrDefault(b => b.UserId == item.WinnerUserId)?.User?.UserName,
             HighestBid = item.Bids.OrderByDescending(b => b.Amount).FirstOrDefault()?.Amount ?? item.StartingPrice,
             BidCount = item.Bids.Count,
-            WinningUser = item.Bids.OrderByDescending(b => b.Amount).FirstOrDefault()?.User?.UserName,
-            TimeLeft = (item.EndTime - DateTime.UtcNow).TotalSeconds > 0 ? (item.EndTime - DateTime.UtcNow).ToString(@"hh\:mm\:ss") : "Ended",
-            Bids = item.Bids.OrderByDescending(b => b.Amount).Select(b => new { b.Id, b.Amount, b.Timestamp, b.UserId, UserName = b.User.UserName })
+            Bids = item.Bids.OrderByDescending(b => b.Amount).Select(b => new { b.Id, b.Amount, b.Timestamp, b.UserId, UserName = b.User.UserName }),
+            TimeLeft = (item.EndTime - now).TotalSeconds > 0 ? (item.EndTime - now).ToString(@"hh\:mm\:ss") : "Ended"
         });
     }
 

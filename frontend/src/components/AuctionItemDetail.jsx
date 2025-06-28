@@ -16,6 +16,7 @@ const AuctionItemDetail = () => {
   const [bidAmount, setBidAmount] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [timeLeft, setTimeLeft] = useState('');
+  const [paying, setPaying] = useState(false);
 
   useEffect(() => {
     fetchAuctionDetails();
@@ -111,35 +112,40 @@ const AuctionItemDetail = () => {
     const now = new Date();
     const end = new Date(auction?.endTime);
     const diff = end - now;
-
-    if (diff <= 0) {
+    if (auction.isCompleted || auction.isPaid || diff <= 0) {
+      const isWinner = user && auction.winnerUserId === user.id;
       return <Badge style={{ 
-        background: '#e2e8f0', 
-        color: '#718096',
+        background: '#ff4d4f',
+        color: '#fff',
         padding: '8px 16px',
         borderRadius: '25px',
-        fontWeight: '600',
-        fontSize: '14px'
+        fontWeight: '700',
+        fontSize: '14px',
+        boxShadow: '0 2px 8px rgba(255,77,79,0.08)'
       }}>
-        <i className="fas fa-times-circle me-1"></i>Ended
+        <i className="fas fa-trophy me-1"></i>{isWinner ? 'Won' : 'Ended'}
       </Badge>;
     } else if (diff < 1000 * 60 * 60) {
       return <Badge style={{ 
-        background: 'linear-gradient(135deg, #f56565 0%, #e53e3e 100%)',
+        background: 'linear-gradient(135deg, #fbbf24 0%, #f59e42 100%)',
+        color: '#222',
         padding: '8px 16px',
         borderRadius: '25px',
-        fontWeight: '600',
-        fontSize: '14px'
+        fontWeight: '700',
+        fontSize: '14px',
+        boxShadow: '0 2px 8px rgba(251,191,36,0.08)'
       }}>
         <i className="fas fa-clock me-1"></i>Ending Soon
       </Badge>;
     } else {
       return <Badge style={{ 
         background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
+        color: '#fff',
         padding: '8px 16px',
         borderRadius: '25px',
-        fontWeight: '600',
-        fontSize: '14px'
+        fontWeight: '700',
+        fontSize: '14px',
+        boxShadow: '0 2px 8px rgba(72,187,120,0.08)'
       }}>
         <i className="fas fa-check-circle me-1"></i>Active
       </Badge>;
@@ -192,6 +198,18 @@ const AuctionItemDetail = () => {
     user.role === 'Admin' ||
     (user.roles && user.roles.includes('Admin'))
   );
+
+  const isAuctionEndedOrCompleted = auction.isCompleted || isAuctionEnded;
+  let leaderName = 'No bids yet';
+  let leaderAmount = null;
+  if (isAuctionEndedOrCompleted) {
+    leaderName = auction.WinnerUserName || 'No bids yet';
+    leaderAmount = auction.highestBid ? Number(auction.highestBid).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : null;
+  } else if (bids.length > 0) {
+    const highestBid = bids[0];
+    leaderName = highestBid.UserName ?? highestBid.userName ?? `User #${highestBid.UserId ?? highestBid.userId ?? 'Unknown'}`;
+    leaderAmount = Number(highestBid.Amount ?? highestBid.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
 
   return (
     <div className="container py-5">
@@ -268,7 +286,7 @@ const AuctionItemDetail = () => {
                   }}>
                     <i className="fas fa-clock fs-3 mb-2 d-block text-warning"></i>
                     <div className="h3 fw-bold mb-1" style={{ color: '#2d3748' }}>
-                      {timeLeft}
+                      {auction.endTime ? new Date(auction.endTime).toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A'}
                     </div>
                     <small className="text-muted">
                       <i className="fas fa-users me-1"></i>
@@ -471,50 +489,32 @@ const AuctionItemDetail = () => {
             </Card.Body>
           </Card>
 
-          {auction.winningUser && auction.highestBid ? (
-            <Card className="border-0 shadow-sm mt-3" style={{ borderRadius: '20px' }}>
-              <Card.Body className="text-center p-4">
-                <div style={{
-                  width: '60px',
-                  height: '60px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 16px'
-                }}>
-                  <i className="fas fa-trophy text-white fs-4"></i>
-                </div>
-                <h6 className="fw-bold mb-1" style={{ color: '#2d3748' }}>Current Leader</h6>
-                <p className="mb-0 text-muted">
-                  {auction.winningUser} <br/>
+          <Card className="border-0 shadow-sm mt-3" style={{ borderRadius: '20px' }}>
+            <Card.Body className="text-center p-4">
+              <div style={{
+                width: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px'
+              }}>
+                <i className="fas fa-trophy text-white fs-4"></i>
+              </div>
+              <h6 className="fw-bold mb-1" style={{ color: '#2d3748' }}>Current Leader</h6>
+              <p className="mb-0 text-muted">
+                {leaderName} <br/>
+                {leaderAmount && (
                   <span className="fw-bold" style={{ color: '#667eea', fontSize: '1.2em' }}>
-                    ₹{Number(auction.highestBid).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    ₹{leaderAmount}
                   </span>
-                </p>
-              </Card.Body>
-            </Card>
-          ) : (
-            <Card className="border-0 shadow-sm mt-3" style={{ borderRadius: '20px' }}>
-              <Card.Body className="text-center p-4">
-                <div style={{
-                  width: '60px',
-                  height: '60px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 16px'
-                }}>
-                  <i className="fas fa-trophy text-white fs-4"></i>
-                </div>
-                <h6 className="fw-bold mb-1" style={{ color: '#2d3748' }}>Current Leader</h6>
-                <p className="mb-0 text-muted">No bids yet</p>
-              </Card.Body>
-            </Card>
-          )}
+                )}
+                {!leaderAmount && 'No bids yet'}
+              </p>
+            </Card.Body>
+          </Card>
         </Col>
       </Row>
     </div>

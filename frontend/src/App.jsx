@@ -14,6 +14,7 @@ import Register from './components/Register';
 import AdminDashboard from './components/AdminDashboard';
 import MyBids from './components/MyBids';
 import About from './components/About';
+import Home from './components/Home';
 
 // Auth Context
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -54,9 +55,10 @@ function App() {
           <Navbar />
           <Container className="mt-4 flex-grow-1">
             <Routes>
-              <Route path="/" element={<AuctionItemList />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/auctions" element={<AuctionItemList />} />
               <Route path="/about" element={<About />} />
-              <Route path="/auction/:id" element={<AuctionItemDetail />} />
+              <Route path="/auctions/:id" element={<AuctionItemDetail />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route 

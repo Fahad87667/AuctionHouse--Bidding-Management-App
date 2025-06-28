@@ -21,4 +21,8 @@ public class AuctionItem
     public DateTime EndTime { get; set; }
     
     public ICollection<Bid> Bids { get; set; } = new List<Bid>();
+    
+    public string? WinnerUserId { get; set; }
+    public bool IsCompleted { get; set; } = false;
+    public bool IsPaid { get; set; } = false;
 } 

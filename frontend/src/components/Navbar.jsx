@@ -70,7 +70,7 @@ const NavigationBar = () => {
           <Nav className="ms-auto align-items-center">
             <Nav.Link 
               as={Link} 
-              to="/"
+              to="/auctions"
               className="mx-2 fw-semibold"
               style={{ 
                 color: '#4a5568',
@@ -80,7 +80,7 @@ const NavigationBar = () => {
               onMouseOver={(e) => e.currentTarget.style.color = '#667eea'}
               onMouseOut={(e) => e.currentTarget.style.color = '#4a5568'}
             >
-              <i className="fas fa-home me-2"></i>
+              <i className="fas fa-gavel me-2"></i>
               Auctions
             </Nav.Link>
             

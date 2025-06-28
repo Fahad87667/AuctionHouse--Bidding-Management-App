@@ -51,6 +51,26 @@ public class BidsController : ControllerBase
             .OrderByDescending(b => b.Timestamp)
             .ToListAsync();
 
+        // Patch: Ensure all ended auctions are marked completed and winner is set
+        var now = DateTime.UtcNow;
+        var updatedAuctions = new HashSet<int>();
+        foreach (var bid in bids)
+        {
+            var auction = bid.AuctionItem;
+            if (!auction.IsCompleted && auction.EndTime <= now && !updatedAuctions.Contains(auction.Id))
+            {
+                var winningBid = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
+                if (winningBid != null)
+                {
+                    auction.WinnerUserId = winningBid.UserId;
+                }
+                auction.IsCompleted = true;
+                updatedAuctions.Add(auction.Id);
+            }
+        }
+        if (updatedAuctions.Count > 0)
+            await _context.SaveChangesAsync();
+
         var result = bids.Select(b => new {
             b.Id,
             b.Amount,
@@ -58,7 +78,11 @@ public class BidsController : ControllerBase
             b.AuctionItemId,
             AuctionTitle = b.AuctionItem.Title,
             AuctionEndTime = b.AuctionItem.EndTime,
-            IsWinning = b.Amount == b.AuctionItem.Bids.Max(bid => bid.Amount)
+            IsWinning = b.Amount == b.AuctionItem.Bids.Max(bid => bid.Amount),
+            WinnerUserId = b.AuctionItem.WinnerUserId,
+            IsCompleted = b.AuctionItem.IsCompleted,
+            IsPaid = b.AuctionItem.IsPaid,
+            UserId = b.UserId
         });
         return Ok(result);
     }
