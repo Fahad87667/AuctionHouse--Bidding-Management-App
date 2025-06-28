@@ -12,9 +12,10 @@ import AuctionItemDetail from './components/AuctionItemDetail';
 import Login from './components/Login';
 import Register from './components/Register';
 import AdminDashboard from './components/AdminDashboard';
-import MyBids from './components/MyBids';
 import About from './components/About';
 import Home from './components/Home';
+import UserDashboard from './components/UserDashboard';
+import PaymentPage from './components/PaymentPage';
 
 // Auth Context
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -69,9 +70,14 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
-              <Route path="/my-bids" element={
+              <Route path="/dashboard" element={
                 <ProtectedRoute requireAdmin={false}>
-                  <MyBids />
+                  <UserDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/payment/:auctionId" element={
+                <ProtectedRoute requireAdmin={false}>
+                  <PaymentPage />
                 </ProtectedRoute>
               } />
             </Routes>

@@ -223,18 +223,6 @@ const Home = () => {
                   </div>
                   <h4 className="fw-bold mb-2">{item.title}</h4>
                   <p className="text-muted">{item.desc}</p>
-                  {idx < 2 && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '40px',
-                      right: '-30%',
-                      width: '60%',
-                      height: '2px',
-                      background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
-                      opacity: 0.3,
-                      display: window.innerWidth > 768 ? 'block' : 'none'
-                    }}></div>
-                  )}
                 </div>
               </Col>
             ))}

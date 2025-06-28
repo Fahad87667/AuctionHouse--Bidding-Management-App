@@ -25,4 +25,7 @@ public class AuctionItem
     public string? WinnerUserId { get; set; }
     public bool IsCompleted { get; set; } = false;
     public bool IsPaid { get; set; } = false;
+    
+    public string OwnerId { get; set; } // User who created the auction
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 } 

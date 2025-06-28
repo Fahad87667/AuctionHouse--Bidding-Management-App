@@ -85,6 +85,15 @@ const AuctionItemList = () => {
     }
   };
 
+  const formatDateTime = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    return date.toLocaleString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+  };
+
   if (loading) return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
       <div style={{ textAlign: 'center' }}>
@@ -179,8 +188,8 @@ const AuctionItemList = () => {
                       <div className="d-flex justify-content-between align-items-center mb-2">
                         <span className="text-muted">Current Bid:</span>
                         <span className="fs-5 fw-bold" style={{ color: '#667eea' }}>
-                          ₹{item.highestBid !== null && item.highestBid !== undefined
-                            ? Number(item.highestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                          ₹{item.HighestBid !== null && item.HighestBid !== undefined
+                            ? Number(item.HighestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                             : (item.startingPrice !== null && item.startingPrice !== undefined
                                 ? Number(item.startingPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                                 : '0.00')}
@@ -188,16 +197,16 @@ const AuctionItemList = () => {
                       </div>
                       <div className="d-flex justify-content-between align-items-center">
                         <span className="text-muted"><i className="fas fa-users me-1"></i>{item.bidCount} bids</span>
-                        <span className="text-muted"><i className="fas fa-clock me-1"></i>{item.endTime ? new Date(item.endTime).toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A'}</span>
+                        <span className="text-muted"><i className="fas fa-clock me-1"></i>{formatDateTime(item.endTime)}</span>
                       </div>
                       <div className="mt-2 text-center" style={{ background: '#e6fffa', borderRadius: '8px', padding: '0.5em 0' }}>
                         <small className="text-muted">
                           <i className="fas fa-trophy text-success me-1"></i>
                           Leading: <span className="fw-semibold">
-                            {item.winningUser && item.highestBid ? (
+                            {item.WinnerUserName && item.HighestBid ? (
                               <>
-                                {item.winningUser} <span style={{ color: '#667eea' }}>
-                                  (₹{Number(item.highestBid).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+                                {item.WinnerUserName} <span style={{ color: '#667eea' }}>
+                                  (₹{Number(item.HighestBid).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
                                 </span>
                               </>
                             ) : 'No bids yet'}
@@ -253,8 +262,8 @@ const AuctionItemList = () => {
                   <div className="p-3" style={{ background: '#f7fafc', borderRadius: '12px' }}>
                     <small className="text-muted d-block mb-1">Current Highest Bid</small>
                     <span className="fs-3 fw-bold" style={{ color: '#667eea' }}>
-                      ₹{bidModal.item.highestBid !== null && bidModal.item.highestBid !== undefined
-                        ? Number(bidModal.item.highestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                      ₹{bidModal.item.HighestBid !== null && bidModal.item.HighestBid !== undefined
+                        ? Number(bidModal.item.HighestBid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                         : (bidModal.item.startingPrice !== null && bidModal.item.startingPrice !== undefined
                             ? Number(bidModal.item.startingPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                             : '0.00')}
@@ -268,11 +277,11 @@ const AuctionItemList = () => {
                   </label>
                   <input
                     type="number"
-                    min={Number(bidModal.item.highestBid ?? bidModal.item.startingPrice) + 1}
+                    min={Number(bidModal.item.HighestBid ?? bidModal.item.startingPrice) + 1}
                     value={bidAmount}
                     onChange={e => setBidAmount(e.target.value)}
                     className="form-control form-control-lg"
-                    placeholder={`Enter more than ₹${Number(bidModal.item.highestBid ?? bidModal.item.startingPrice)}`}
+                    placeholder={`Enter more than ₹${Number(bidModal.item.HighestBid ?? bidModal.item.startingPrice)}`}
                     style={{ 
                       borderRadius: '12px',
                       border: '1.5px solid #e2e8f0',

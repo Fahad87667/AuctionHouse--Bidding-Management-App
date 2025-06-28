@@ -51,10 +51,16 @@ public class BidsController : ControllerBase
             .OrderByDescending(b => b.Timestamp)
             .ToListAsync();
 
+        // Only keep the latest (or highest) bid per auction
+        var latestBidsPerAuction = bids
+            .GroupBy(b => b.AuctionItemId)
+            .Select(g => g.OrderByDescending(b => b.Amount).ThenByDescending(b => b.Timestamp).First())
+            .ToList();
+
         // Patch: Ensure all ended auctions are marked completed and winner is set
         var now = DateTime.UtcNow;
         var updatedAuctions = new HashSet<int>();
-        foreach (var bid in bids)
+        foreach (var bid in latestBidsPerAuction)
         {
             var auction = bid.AuctionItem;
             if (!auction.IsCompleted && auction.EndTime <= now && !updatedAuctions.Contains(auction.Id))
@@ -71,12 +77,14 @@ public class BidsController : ControllerBase
         if (updatedAuctions.Count > 0)
             await _context.SaveChangesAsync();
 
-        var result = bids.Select(b => new {
+        var result = latestBidsPerAuction.Select(b => new {
             b.Id,
             b.Amount,
             b.Timestamp,
             b.AuctionItemId,
             AuctionTitle = b.AuctionItem.Title,
+            AuctionImageUrl = b.AuctionItem.ImageUrl,
+            AuctionDescription = b.AuctionItem.Description,
             AuctionEndTime = b.AuctionItem.EndTime,
             IsWinning = b.Amount == b.AuctionItem.Bids.Max(bid => bid.Amount),
             WinnerUserId = b.AuctionItem.WinnerUserId,

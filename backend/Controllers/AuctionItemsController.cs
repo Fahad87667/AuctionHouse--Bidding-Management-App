@@ -47,7 +47,12 @@ public class AuctionItemsController : ControllerBase
             item.IsCompleted,
             item.IsPaid,
             item.WinnerUserId,
-            WinnerUserName = item.Bids.FirstOrDefault(b => b.UserId == item.WinnerUserId)?.User?.UserName,
+            WinnerUserName = (
+                (from b in item.Bids.OrderByDescending(b => b.Amount)
+                 join u in _context.Set<Microsoft.AspNetCore.Identity.IdentityUser>() on b.UserId equals u.Id into userJoin
+                 from u in userJoin.DefaultIfEmpty()
+                 select u.UserName ?? b.User.UserName ?? b.User.Email ?? b.UserId).FirstOrDefault()
+            ),
             HighestBid = item.Bids.OrderByDescending(b => b.Amount).FirstOrDefault()?.Amount ?? item.StartingPrice,
             BidCount = item.Bids.Count,
             Bids = item.Bids
@@ -92,7 +97,12 @@ public class AuctionItemsController : ControllerBase
             item.IsCompleted,
             item.IsPaid,
             item.WinnerUserId,
-            WinnerUserName = item.Bids.FirstOrDefault(b => b.UserId == item.WinnerUserId)?.User?.UserName,
+            WinnerUserName = (
+                (from b in item.Bids.OrderByDescending(b => b.Amount)
+                 join u in _context.Set<Microsoft.AspNetCore.Identity.IdentityUser>() on b.UserId equals u.Id into userJoin
+                 from u in userJoin.DefaultIfEmpty()
+                 select u.UserName ?? b.User.UserName ?? b.User.Email ?? b.UserId).FirstOrDefault()
+            ),
             HighestBid = item.Bids.OrderByDescending(b => b.Amount).FirstOrDefault()?.Amount ?? item.StartingPrice,
             BidCount = item.Bids.Count,
             Bids = item.Bids.OrderByDescending(b => b.Amount).Select(b => new { b.Id, b.Amount, b.Timestamp, b.UserId, UserName = b.User.UserName }),
@@ -109,6 +119,11 @@ public class AuctionItemsController : ControllerBase
 
         if (item.StartingPrice <= 0)
             return BadRequest("Starting price must be greater than 0");
+
+        // Set owner and created time
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        item.OwnerId = userId;
+        item.CreatedAt = DateTime.UtcNow;
 
         _context.AuctionItems.Add(item);
         await _context.SaveChangesAsync();

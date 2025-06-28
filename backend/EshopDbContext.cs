@@ -10,6 +10,7 @@ public class EshopDbContext : IdentityDbContext<IdentityUser>
 
     public DbSet<AuctionItem> AuctionItems { get; set; }
     public DbSet<Bid> Bids { get; set; }
+    public DbSet<Payment> Payments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

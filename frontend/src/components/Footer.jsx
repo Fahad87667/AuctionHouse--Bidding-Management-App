@@ -178,7 +178,7 @@ const Footer = () => {
               </li>
               <li className="mb-2">
                 <Link 
-                  to="/my-bids" 
+                  to="/dashboard" 
                   className="text-light opacity-75 text-decoration-none"
                   style={{ transition: 'all 0.3s ease' }}
                   onMouseOver={(e) => {
@@ -191,7 +191,7 @@ const Footer = () => {
                   }}
                 >
                   <i className="fas fa-chevron-right me-2" style={{ fontSize: '12px' }}></i>
-                  My Bids
+                  Dashboard
                 </Link>
               </li>
               <li className="mb-2">

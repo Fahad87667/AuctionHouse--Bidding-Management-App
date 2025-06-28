@@ -100,31 +100,18 @@ const NavigationBar = () => {
               About
             </Nav.Link>
             
-            {user && !isAdmin && (
-              <Nav.Link 
-                as={Link} 
-                to="/my-bids"
-                className="mx-2 fw-semibold"
-                style={{ 
-                  color: '#4a5568',
-                  transition: 'color 0.2s ease'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.color = '#667eea'}
-                onMouseOut={(e) => e.currentTarget.style.color = '#4a5568'}
-              >
-                <i className="fas fa-gavel me-2"></i>
-                My Bids
-              </Nav.Link>
-            )}
-            
             <div className="d-flex align-items-center ms-lg-4">
               {user ? (
                 <>
                   <div className="d-flex align-items-center me-3" style={{
                     padding: '8px 16px',
                     background: '#f7fafc',
-                    borderRadius: '25px'
-                  }}>
+                    borderRadius: '25px',
+                    cursor: isAdmin ? 'default' : 'pointer'
+                  }}
+                  title={isAdmin ? undefined : 'Go to your dashboard'}
+                  onClick={isAdmin ? undefined : () => navigate('/dashboard')}
+                  >
                     <div style={{
                       width: '32px',
                       height: '32px',

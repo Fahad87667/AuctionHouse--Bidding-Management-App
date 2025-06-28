@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Row, Col, Button, Badge, Alert, Form, ListGroup } from 'react-bootstrap';
+import { Card, Row, Col, Button, Badge, Alert, Form, ListGroup, Modal, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -17,6 +17,10 @@ const AuctionItemDetail = () => {
   const [submitting, setSubmitting] = useState(false);
   const [timeLeft, setTimeLeft] = useState('');
   const [paying, setPaying] = useState(false);
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [payLoading, setPayLoading] = useState(false);
+  const [payError, setPayError] = useState('');
+  const [paySuccess, setPaySuccess] = useState(false);
 
   useEffect(() => {
     fetchAuctionDetails();
@@ -152,6 +156,51 @@ const AuctionItemDetail = () => {
     }
   };
 
+  const handlePayNow = async () => {
+    setPayLoading(true);
+    setPayError('');
+    try {
+      // 1. Create payment order
+      const res = await axios.post('http://localhost:5100/api/payments/create-order', { AuctionId: auction.id }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      // 2. Simulate payment (show confirm modal)
+      setShowPayModal(true);
+      setPayLoading(false);
+    } catch (err) {
+      setPayError(err.response?.data || 'Failed to create payment order');
+      setPayLoading(false);
+    }
+  };
+
+  const handleConfirmPayment = async () => {
+    setPayLoading(true);
+    setPayError('');
+    try {
+      // 3. Confirm payment (mock)
+      await axios.post('http://localhost:5100/api/payments/confirm', { AuctionId: auction.id }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      setPaySuccess(true);
+      setShowPayModal(false);
+      await fetchAuctionDetails(); // Refresh auction status
+    } catch (err) {
+      setPayError(err.response?.data || 'Payment failed');
+    } finally {
+      setPayLoading(false);
+    }
+  };
+
+  // Helper to format date/time in a readable way
+  const formatDateTime = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    const date = new Date(dateStr);
+    return date.toLocaleString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+  };
+
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
@@ -210,6 +259,26 @@ const AuctionItemDetail = () => {
     leaderName = highestBid.UserName ?? highestBid.userName ?? `User #${highestBid.UserId ?? highestBid.userId ?? 'Unknown'}`;
     leaderAmount = Number(highestBid.Amount ?? highestBid.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
+
+  const isWinner = user && auction.winnerUserId === user.id;
+  const canPay = isWinner && auction.isCompleted && !auction.isPaid;
+
+  const renderPayModal = () => (
+    <Modal show={showPayModal} onHide={() => setShowPayModal(false)} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Confirm Payment</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>Are you sure you want to pay for this auction?</p>
+        {payLoading && <Spinner animation="border" />}
+        {payError && <div className="alert alert-danger mt-2">{payError}</div>}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={() => setShowPayModal(false)} disabled={payLoading}>Cancel</Button>
+        <Button variant="success" onClick={handleConfirmPayment} disabled={payLoading}>Confirm Payment</Button>
+      </Modal.Footer>
+    </Modal>
+  );
 
   return (
     <div className="container py-5">
@@ -286,7 +355,7 @@ const AuctionItemDetail = () => {
                   }}>
                     <i className="fas fa-clock fs-3 mb-2 d-block text-warning"></i>
                     <div className="h3 fw-bold mb-1" style={{ color: '#2d3748' }}>
-                      {auction.endTime ? new Date(auction.endTime).toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A'}
+                      {auction.endTime ? formatDateTime(auction.endTime) : 'N/A'}
                     </div>
                     <small className="text-muted">
                       <i className="fas fa-users me-1"></i>
@@ -517,6 +586,19 @@ const AuctionItemDetail = () => {
           </Card>
         </Col>
       </Row>
+
+      {canPay && (
+        <div className="my-4">
+          <Button variant="success" onClick={handlePayNow} disabled={payLoading}>
+            {payLoading ? <Spinner size="sm" animation="border" /> : 'Pay Now'}
+          </Button>
+          {payError && <div className="alert alert-danger mt-2">{payError}</div>}
+        </div>
+      )}
+      {paySuccess && (
+        <div className="alert alert-success mt-2">Payment successful! Thank you.</div>
+      )}
+      {renderPayModal()}
     </div>
   );
 };

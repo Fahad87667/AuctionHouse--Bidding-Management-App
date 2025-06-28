@@ -7,6 +7,7 @@ const AdminDashboard = () => {
   const { user } = useAuth();
   const [auctions, setAuctions] = useState([]);
   const [bids, setBids] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -26,6 +27,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchData();
+    fetchPayments();
   }, []);
 
   const fetchData = async () => {
@@ -42,6 +44,17 @@ const AdminDashboard = () => {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPayments = async () => {
+    try {
+      const res = await axios.get('http://localhost:5100/api/payments/logs', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      setPayments(res.data);
+    } catch (err) {
+      // ignore for now
     }
   };
 
@@ -699,6 +712,58 @@ const AdminDashboard = () => {
                   </div>
                 ))
               )}
+            </Card.Body>
+          </Card>
+        </Tab>
+
+        <Tab 
+          eventKey="payments" 
+          title={
+            <span style={{ 
+              padding: '10px 20px',
+              borderRadius: '25px',
+              background: activeTab === 'payments' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
+              color: activeTab === 'payments' ? 'white' : '#667eea',
+              fontWeight: '600',
+              display: 'inline-block'
+            }}>
+              <i className="fas fa-receipt me-2"></i>
+              Payments
+            </span>
+          }
+        >
+          <Card className="border-0 shadow-sm" style={{ borderRadius: '20px' }}>
+            <Card.Body className="p-0">
+              <div className="table-responsive">
+                <Table hover className="mb-0">
+                  <thead style={{ backgroundColor: '#f8fafc' }}>
+                    <tr>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">AuctionId</th>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">UserId</th>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">Amount</th>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">Status</th>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">TransactionId</th>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">Timestamp</th>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">Gateway</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payments.length === 0 ? (
+                      <tr><td colSpan="7" className="text-center py-4">No payments yet</td></tr>
+                    ) : payments.map((p, idx) => (
+                      <tr key={p.id || idx}>
+                        <td className="py-3 px-4">{p.auctionId}</td>
+                        <td className="py-3 px-4">{p.userId}</td>
+                        <td className="py-3 px-4">₹{Number(p.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                        <td className="py-3 px-4">{p.status}</td>
+                        <td className="py-3 px-4">{p.transactionId}</td>
+                        <td className="py-3 px-4">{new Date(p.timestamp).toLocaleString('en-IN')}</td>
+                        <td className="py-3 px-4">{p.gateway}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
             </Card.Body>
           </Card>
         </Tab>
