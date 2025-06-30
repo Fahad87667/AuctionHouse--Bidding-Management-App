@@ -681,66 +681,85 @@ const AdminDashboard = () => {
                   <p className="text-muted">No bids placed yet</p>
                 </div>
               ) : (
-                bids.slice(0, 50).map((bid, index) => (
-                  <div 
-                    key={bid.id} 
-                    className="px-4 py-3"
-                    style={{ 
-                      borderBottom: index < bids.length - 1 ? '1px solid #f0f4f8' : 'none',
-                      transition: 'background 0.2s ease'
-                    }}
-                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <div className="d-flex justify-content-between align-items-start">
-                      <div className="d-flex align-items-center">
-                        <div style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          marginRight: '12px'
-                        }}>
-                          <i className="fas fa-user text-white" style={{ fontSize: '16px' }}></i>
-                        </div>
-                        <div>
-                          <div className="d-flex align-items-center">
-                            <strong style={{ color: '#2d3748', fontSize: '16px' }}>
-                              {bid.amount !== null && bid.amount !== undefined
-                                ? '₹' + bid.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                                : '0.00'}
-                            </strong>
-                            <span className="badge ms-2" style={{ 
-                              background: '#e6f0ff',
-                              color: '#667eea',
-                              fontSize: '11px',
-                              padding: '4px 8px',
-                              borderRadius: '12px'
-                            }}>
-                              BID
-                            </span>
+                bids
+                  .slice()
+                  .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                  .slice(0, 50)
+                  .map((bid, index) => (
+                    <div 
+                      key={bid.id} 
+                      className="px-4 py-3"
+                      style={{ 
+                        borderBottom: index < bids.length - 1 ? '1px solid #f0f4f8' : 'none',
+                        transition: 'background 0.2s ease'
+                      }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <div className="d-flex justify-content-between align-items-start">
+                        <div className="d-flex align-items-center">
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginRight: '12px'
+                          }}>
+                            <i className="fas fa-user text-white" style={{ fontSize: '16px' }}></i>
                           </div>
+                          <div>
+                            <div className="d-flex align-items-center">
+                              <strong style={{ color: '#2d3748', fontSize: '16px' }}>
+                                {bid.amount !== null && bid.amount !== undefined
+                                  ? '₹' + bid.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                                  : '0.00'}
+                              </strong>
+                              <span className="badge ms-2" style={{ 
+                                background: '#e6f0ff',
+                                color: '#667eea',
+                                fontSize: '11px',
+                                padding: '4px 8px',
+                                borderRadius: '12px'
+                              }}>
+                                BID
+                              </span>
+                            </div>
+                            <small className="text-muted d-block">
+                              {bid.userName || bid.userEmail || 'Anonymous User'}
+                            </small>
+                          </div>
+                        </div>
+                        <div className="text-end">
                           <small className="text-muted d-block">
-                            {bid.userName || bid.userEmail || 'Anonymous User'}
+                            <i className="fas fa-gavel me-1"></i>
+                            {bid.auctionTitle}
+                          </small>
+                          <small className="text-muted">
+                            {bid.timestamp ? (() => {
+                              let ts = bid.timestamp;
+                              // If not ISO, convert 'YYYY-MM-DD HH:mm:ss' to 'YYYY-MM-DDTHH:mm:ssZ'
+                              if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(ts)) {
+                                ts = ts.replace(' ', 'T') + 'Z';
+                              }
+                              return new Date(ts).toLocaleString('en-IN', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                hour12: true,
+                                timeZone: 'Asia/Kolkata'
+                              });
+                            })() : 'N/A'}
                           </small>
                         </div>
                       </div>
-                      <div className="text-end">
-                        <small className="text-muted d-block">
-                          <i className="fas fa-gavel me-1"></i>
-                          {bid.auctionTitle}
-                        </small>
-                        <small className="text-muted">
-                          <i className="far fa-clock me-1"></i>
-                          {bid.timestamp ? new Date(bid.timestamp).toLocaleString() : 'N/A'}
-                        </small>
-                      </div>
                     </div>
-                  </div>
-                ))
+                  ))
               )}
             </Card.Body>
           </Card>

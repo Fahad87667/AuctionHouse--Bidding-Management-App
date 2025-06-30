@@ -21,7 +21,7 @@ const About = () => {
       skills: ['React', 'C#', 'MySql', '.NET']
     },
     {
-      name: 'Sarah Chen',
+      name: 'Rajesh Rajak',
       role: 'Frontend Developer & UI/UX Designer',
       // Use imported image: image: developer2Photo,
       // Or use public folder: image: '/images/sarah-chen.jpg',
