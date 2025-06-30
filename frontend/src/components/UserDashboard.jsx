@@ -595,6 +595,83 @@ const UserDashboard = () => {
                 )}
               </div>
         </Tab>
+        <Tab 
+          eventKey="order-history" 
+          title={
+            <span>
+              <i className="fas fa-file-invoice me-2"></i>
+              Order History
+              {payments.length > 0 && (
+                <Badge 
+                  className="ms-2" 
+                  style={{ 
+                    background: '#764ba2',
+                    borderRadius: '12px',
+                    padding: '4px 8px'
+                  }}
+                >
+                  {payments.length}
+                </Badge>
+              )}
+            </span>
+          }
+        >
+          <div className="p-4">
+            {payments.length === 0 ? (
+              <div className="text-center py-5">
+                <i className="fas fa-file-invoice text-muted mb-3" style={{ fontSize: '4rem' }}></i>
+                <h5 className="text-muted">No Orders Yet</h5>
+                <p className="text-muted">Your order history will appear here</p>
+              </div>
+            ) : (
+              <div className="table-responsive">
+                <Table hover className="mb-0" style={{ borderCollapse: 'separate', borderSpacing: '0 8px' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#f8f9fa' }}>
+                      <th style={{ border: 'none', padding: '15px', borderRadius: '12px 0 0 12px' }}>Auction ID</th>
+                      <th style={{ border: 'none', padding: '15px' }}>Amount</th>
+                      <th style={{ border: 'none', padding: '15px' }}>Status</th>
+                      <th style={{ border: 'none', padding: '15px' }}>Transaction ID</th>
+                      <th style={{ border: 'none', padding: '15px' }}>Date & Time</th>
+                      <th style={{ border: 'none', padding: '15px' }}>Gateway</th>
+                      <th style={{ border: 'none', padding: '15px', borderRadius: '0 12px 12px 0' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payments.map((p, idx) => (
+                      <tr key={p.id || idx} style={{ 
+                        backgroundColor: 'white',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                      }}>
+                        <td style={{ border: 'none', padding: '20px', borderRadius: '12px 0 0 12px', fontWeight: '600' }}>#{p.auctionId}</td>
+                        <td style={{ border: 'none', padding: '20px', fontSize: '16px', fontWeight: '600', color: '#667eea' }}>₹{Number(p.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                        <td style={{ border: 'none', padding: '20px' }}>
+                          <Badge style={{ background: p.status === 'Completed' ? '#48bb78' : '#fbbf24', color: '#fff', padding: '6px 12px', borderRadius: '20px', fontWeight: '600' }}>
+                            <i className={`fas ${p.status === 'Completed' ? 'fa-check-circle' : 'fa-clock'} me-1`}></i>
+                            {p.status}
+                          </Badge>
+                        </td>
+                        <td style={{ border: 'none', padding: '20px', fontFamily: 'monospace', fontSize: '14px' }}>{p.transactionId}</td>
+                        <td style={{ border: 'none', padding: '20px' }}>{formatDateTime(p.timestamp)}</td>
+                        <td style={{ border: 'none', padding: '20px' }}>{p.gateway}</td>
+                        <td style={{ border: 'none', padding: '20px', borderRadius: '0 12px 12px 0' }}>
+                          <Button 
+                            size="sm" 
+                            variant="outline-primary"
+                            onClick={() => navigate(`/order-receipt/${p.auctionId}`)}
+                            style={{ borderRadius: '20px', padding: '6px 18px', fontWeight: '600' }}
+                          >
+                            <i className="fas fa-receipt me-1"></i>View Receipt
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            )}
+          </div>
+        </Tab>
       </Tabs>
         </Card.Body>
       </Card>
