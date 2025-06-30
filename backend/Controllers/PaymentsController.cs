@@ -141,6 +141,62 @@ public class PaymentsController : ControllerBase
         var clientSecret = "mock_client_secret_" + Guid.NewGuid();
         return Ok(new { clientSecret, amount });
     }
+
+    // GET: api/payments/order-receipt/{auctionId}
+    [HttpGet("order-receipt/{auctionId}")]
+    [Authorize]
+    public async Task<IActionResult> GetOrderReceipt(int auctionId)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var auction = await _context.AuctionItems.Include(a => a.Bids).FirstOrDefaultAsync(a => a.Id == auctionId);
+        if (auction == null) return NotFound("Auction not found");
+        if (auction.WinnerUserId != userId) return Forbid();
+        var payment = await _context.Payments.OrderByDescending(p => p.Timestamp).FirstOrDefaultAsync(p => p.AuctionId == auctionId && p.UserId == userId);
+        if (payment == null) return NotFound("Payment not found");
+        // Optionally, fetch user info (if needed)
+        // For now, just return placeholders for delivery details
+        return Ok(new {
+            Auction = new {
+                auction.Id,
+                auction.Title,
+                auction.Description,
+                auction.ImageUrl,
+                auction.EndTime,
+                auction.IsPaid,
+                auction.IsCompleted
+            },
+            Payment = new {
+                payment.Id,
+                payment.Amount,
+                payment.Status,
+                payment.TransactionId,
+                payment.Timestamp,
+                payment.Gateway
+            },
+            Delivery = new {
+                Address = "123 Demo Street, City, Country",
+                EstimatedDelivery = System.DateTime.UtcNow.AddDays(5).ToString("yyyy-MM-dd")
+            }
+        });
+    }
+
+    // POST: api/payments/force-complete
+    [HttpPost("force-complete")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ForceComplete([FromBody] int auctionId)
+    {
+        var auction = await _context.AuctionItems.Include(a => a.Bids).FirstOrDefaultAsync(a => a.Id == auctionId);
+        if (auction == null) return NotFound("Auction not found");
+        if (auction.IsCompleted) return Ok(new { message = "Auction already completed." });
+        var winningBid = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
+        if (winningBid != null)
+        {
+            auction.WinnerUserId = winningBid.UserId;
+        }
+        auction.IsCompleted = true;
+        await _context.SaveChangesAsync();
+        return Ok(new { success = true, winnerUserId = auction.WinnerUserId });
+    }
 }
 
 public class CreatePaymentOrderDto

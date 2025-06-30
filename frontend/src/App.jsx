@@ -16,6 +16,7 @@ import About from './components/About';
 import Home from './components/Home';
 import UserDashboard from './components/UserDashboard';
 import PaymentPage from './components/PaymentPage';
+import OrderReciept from './components/OrderReciept';
 
 // Auth Context
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -80,6 +81,7 @@ function App() {
                   <PaymentPage />
                 </ProtectedRoute>
               } />
+              <Route path="/order-receipt/:auctionId" element={<OrderReciept />} />
             </Routes>
           </Container>
           <Footer />

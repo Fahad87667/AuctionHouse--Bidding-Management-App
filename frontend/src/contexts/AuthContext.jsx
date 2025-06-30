@@ -33,7 +33,8 @@ export const AuthProvider = ({ children }) => {
       const userData = response.data;
       setUser({
         ...userData,
-        role: userData.roles && userData.roles.length > 0 ? userData.roles[0] : 'User'
+        role: userData.roles && userData.roles.length > 0 ? userData.roles[0] : 'User',
+        id: userData.id || userData.userId || localStorage.getItem('userId')
       });
     } catch (error) {
       localStorage.removeItem('token');
@@ -56,7 +57,8 @@ export const AuthProvider = ({ children }) => {
         username,
         email: userEmail,
         role: roles && roles.length > 0 ? roles[0] : 'User',
-        roles: roles
+        roles: roles,
+        id: response.data.id || response.data.userId || localStorage.getItem('userId')
       };
       setUser(userData);
       return { success: true };
@@ -85,7 +87,8 @@ export const AuthProvider = ({ children }) => {
         username: userUsername,
         email: userEmail,
         role: roles && roles.length > 0 ? roles[0] : 'User',
-        roles: roles
+        roles: roles,
+        id: response.data.id || response.data.userId || localStorage.getItem('userId')
       };
       setUser(userData);
       return { success: true };

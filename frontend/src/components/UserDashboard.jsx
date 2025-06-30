@@ -98,7 +98,8 @@ const UserDashboard = () => {
   // Filter for won but unpaid auctions
   const wonUnpaid = bids.filter(bid => {
     const auctionEnded = bid.auctionEndTime && new Date(bid.auctionEndTime) <= new Date();
-    const isWinner = (bid.isCompleted || bid.isPaid) && bid.winnerUserId && user.id && bid.winnerUserId === user.id;
+    const winnerUserId = bid.winnerUserId || bid.WinnerUserId;
+    const isWinner = (bid.isCompleted || bid.isPaid) && winnerUserId && user && (winnerUserId == user.id || bid.winnerUserEmail === user.email);
     return isWinner && !bid.isPaid;
   });
 
@@ -121,7 +122,8 @@ const UserDashboard = () => {
   const getStatusBadge = (bid) => {
     const auctionEnded = bid.auctionEndTime && new Date(bid.auctionEndTime) <= new Date();
     const isUserHighest = bid.isWinning && auctionEnded;
-    const isBackendWinner = (bid.isCompleted || bid.isPaid) && bid.winnerUserId && user.id && bid.winnerUserId === user.id;
+    const winnerUserId = bid.winnerUserId || bid.WinnerUserId;
+    const isBackendWinner = (bid.isCompleted || bid.isPaid) && winnerUserId && user && (winnerUserId == user.id || bid.winnerUserEmail === user.email);
     
     if (isBackendWinner || isUserHighest) {
       return <Badge style={{ 
@@ -318,7 +320,7 @@ const UserDashboard = () => {
                 ) : (
                   <div className="table-responsive">
                     <Table hover className="mb-0 align-middle" style={{ borderCollapse: 'separate', borderSpacing: '0 8px' }}>
-                      <thead>
+            <thead>
                         <tr style={{ backgroundColor: '#f8f9fa' }}>
                           <th style={{ border: 'none', padding: '15px', borderRadius: '12px 0 0 12px' }}>Listing</th>
                           <th style={{ border: 'none', padding: '15px' }}>Time Left</th>
@@ -331,16 +333,16 @@ const UserDashboard = () => {
                             const canPay = (isBackendWinner || isUserHighest) && !bid.isPaid;
                             return canPay;
                           }) && <th style={{ border: 'none', padding: '15px', borderRadius: '0 12px 12px 0' }}>Action</th>}
-                        </tr>
-                      </thead>
-                      <tbody>
+              </tr>
+            </thead>
+            <tbody>
                         {bids.map((bid, idx) => {
-                          const auctionEnded = bid.auctionEndTime && new Date(bid.auctionEndTime) <= new Date();
-                          const isUserHighest = bid.isWinning && auctionEnded;
-                          const isBackendWinner = (bid.isCompleted || bid.isPaid) && bid.winnerUserId && user.id && bid.winnerUserId === user.id;
-                          const canPay = (isBackendWinner || isUserHighest) && !bid.isPaid;
+                const auctionEnded = bid.auctionEndTime && new Date(bid.auctionEndTime) <= new Date();
+                const isUserHighest = bid.isWinning && auctionEnded;
+                const isBackendWinner = (bid.isCompleted || bid.isPaid) && bid.winnerUserId && user.id && bid.winnerUserId === user.id;
+                const canPay = (isBackendWinner || isUserHighest) && !bid.isPaid;
                           
-                          return (
+                return (
                             <tr key={bid.id || idx} style={{ 
                               backgroundColor: 'white',
                               boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
@@ -373,7 +375,13 @@ const UserDashboard = () => {
                                         height: '100%', 
                                         objectFit: 'cover'
                                       }}
-                                      onError={(e) => { e.target.src = '/images/no-image.png' }}
+                                      onError={(e) => {
+                                        // Prevent infinite loop by using a data URL as fallback
+                                        if (e.target.src !== 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjdGQUZDIi8+CjxwYXRoIGQ9Ik0yMCAxMkMxNS41ODIgMTIgMTIgMTUuNTgyIDEyIDIwQzEyIDI0LjQxOCAxNS41ODIgMjggMjAgMjhDMjQuNDE4IDI4IDI4IDI0LjQxOCAyOCAyMEMyOCAxNS41ODIgMjQuNDE4IDEyIDIwIDEyWk0yMCAyNkMxNy43OTEgMjYgMTYgMjQuMjA5IDE2IDIyQzE2IDE5Ljc5MSAxNy43OTEgMTggMjAgMThDMjIuMjA5IDE4IDI0IDE5Ljc5MSAyNCAyMkMyNCAyNC4yMDkgMjIuMjA5IDI2IDIwIDI2WiIgZmlsbD0iI0EwQUVBMiIvPgo8L3N2Zz4K') {
+                                          e.target.onerror = null;
+                                          e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjdGQUZDIi8+CjxwYXRoIGQ9Ik0yMCAxMkMxNS41ODIgMTIgMTIgMTUuNTgyIDEyIDIwQzEyIDI0LjQxOCAxNS41ODIgMjggMjAgMjhDMjQuNDE4IDI4IDI4IDI0LjQxOCAyOCAyMEMyOCAxNS41ODIgMjQuNDE4IDEyIDIwIDEyWk0yMCAyNkMxNy43OTEgMjYgMTYgMjQuMjA5IDE2IDIyQzE2IDE5Ljc5MSAxNy43OTEgMTggMjAgMThDMjIuMjA5IDE4IDI0IDE5Ljc5MSAyNCAyMkMyNCAyNC4yMDkgMjIuMjA5IDI2IDIwIDI2WiIgZmlsbD0iI0EwQUVBMiIvPgo8L3N2Zz4K';
+                                        }
+                                      }}
                                     />
                                   </div>
                                   <div>
@@ -406,7 +414,7 @@ const UserDashboard = () => {
                               </td>
                               <td style={{ border: 'none', padding: '20px' }}>
                                 {getStatusBadge(bid)}
-                              </td>
+                    </td>
                               {bids.some(bid => {
                                 const auctionEnded = bid.auctionEndTime && new Date(bid.auctionEndTime) <= new Date();
                                 const isUserHighest = bid.isWinning && auctionEnded;
@@ -419,12 +427,12 @@ const UserDashboard = () => {
                                   padding: '20px',
                                   borderRadius: '0 12px 12px 0'
                                 }}>
-                                  {canPay && (
+                      {canPay && (
                                     <>
-                                      <Button 
-                                        size="sm" 
+                        <Button 
+                          size="sm" 
                                         className="fw-semibold"
-                                        onClick={() => navigate(`/payment/${bid.auctionItemId}`)}
+                          onClick={() => navigate(`/payment/${bid.auctionItemId}`)}
                                         style={{ 
                                           background: 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
                                           border: 'none',
@@ -442,29 +450,29 @@ const UserDashboard = () => {
                                         }}
                                       >
                                         <i className="fas fa-credit-card me-1"></i>
-                                        Pay Now
-                                      </Button>
-                                      {paySuccess === bid.auctionItemId && (
+                          Pay Now
+                        </Button>
+                      {paySuccess === bid.auctionItemId && (
                                         <div className="text-success mt-2">
                                           <i className="fas fa-check-circle me-1"></i>Paid!
                                         </div>
-                                      )}
-                                      {payError && payLoading === bid.auctionItemId && (
+                      )}
+                      {payError && payLoading === bid.auctionItemId && (
                                         <div className="text-danger small mt-2">{payError}</div>
                                       )}
                                     </>
-                                  )}
-                                </td>
+                      )}
+                    </td>
                               )}
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </Table>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </Table>
                   </div>
                 )}
               </div>
-            </Tab>
+        </Tab>
             
             <Tab 
               eventKey="payments" 
@@ -497,7 +505,7 @@ const UserDashboard = () => {
                 ) : (
                   <div className="table-responsive">
                     <Table hover className="mb-0" style={{ borderCollapse: 'separate', borderSpacing: '0 8px' }}>
-                      <thead>
+            <thead>
                         <tr style={{ backgroundColor: '#f8f9fa' }}>
                           <th style={{ border: 'none', padding: '15px', borderRadius: '12px 0 0 12px' }}>
                             <i className="fas fa-hashtag me-2"></i>Auction ID
@@ -517,9 +525,9 @@ const UserDashboard = () => {
                           <th style={{ border: 'none', padding: '15px', borderRadius: '0 12px 12px 0' }}>
                             <i className="fas fa-university me-2"></i>Gateway
                           </th>
-                        </tr>
-                      </thead>
-                      <tbody>
+              </tr>
+            </thead>
+            <tbody>
                         {payments.map((p, idx) => (
                           <tr key={p.id || idx} style={{ 
                             backgroundColor: 'white',
@@ -579,15 +587,15 @@ const UserDashboard = () => {
                                 {p.gateway}
                               </span>
                             </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </Table>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
                   </div>
                 )}
               </div>
-            </Tab>
-          </Tabs>
+        </Tab>
+      </Tabs>
         </Card.Body>
       </Card>
 
@@ -616,4 +624,4 @@ const UserDashboard = () => {
   );
 };
 
-export default UserDashboard;
+export default UserDashboard; 

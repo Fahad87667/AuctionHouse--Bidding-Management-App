@@ -33,6 +33,10 @@ public class AuctionItemsController : ControllerBase
                 {
                     item.WinnerUserId = winningBid.UserId;
                 }
+                else
+                {
+                    item.WinnerUserId = null;
+                }
                 item.IsCompleted = true;
             }
         }
@@ -83,6 +87,10 @@ public class AuctionItemsController : ControllerBase
             if (winningBid != null)
             {
                 item.WinnerUserId = winningBid.UserId;
+            }
+            else
+            {
+                item.WinnerUserId = null;
             }
             item.IsCompleted = true;
             await _context.SaveChangesAsync();

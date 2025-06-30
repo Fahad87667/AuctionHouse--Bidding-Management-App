@@ -121,15 +121,27 @@ const AdminDashboard = () => {
         description: formData.description.trim(),
         startingPrice: parseFloat(formData.startingPrice),
         imageUrl,
-        endTime: endDateUTC.toISOString()
+        endTime: endDateUTC.toISOString(),
+        ownerId: user?.id || userId
       };
 
       await axios.post('http://localhost:5100/api/auctionitems', auctionData);
       handleCloseAddModal();
       fetchData();
     } catch (error) {
-      console.error('Error adding auction:', error.response?.data || error.message);
-      setError(error.response?.data || 'Failed to add auction');
+      let errMsg = 'Failed to add auction';
+      if (error.response?.data) {
+        if (typeof error.response.data === 'string') {
+          errMsg = error.response.data;
+        } else if (typeof error.response.data.title === 'string') {
+          errMsg = error.response.data.title;
+        } else if (error.response.data.errors) {
+          errMsg = Object.entries(error.response.data.errors).map(([field, messages]) => `${field}: ${messages.join(', ')}`).join(' | ');
+        } else {
+          errMsg = JSON.stringify(error.response.data);
+        }
+      }
+      setError(errMsg);
     }
     setImageFile(null);
     setImagePreview(null);
@@ -189,15 +201,27 @@ const AdminDashboard = () => {
         description: formData.description.trim(),
         startingPrice: parseFloat(formData.startingPrice),
         imageUrl,
-        endTime: endDateUTC.toISOString()
+        endTime: endDateUTC.toISOString(),
+        ownerId: user?.id || userId
       };
 
       await axios.put(`http://localhost:5100/api/auctionitems/${selectedAuction.id}`, auctionData);
       handleCloseEditModal();
       fetchData();
     } catch (error) {
-      console.error('Error updating auction:', error.response?.data || error.message);
-      setError(error.response?.data || 'Failed to update auction');
+      let errMsg = 'Failed to update auction';
+      if (error.response?.data) {
+        if (typeof error.response.data === 'string') {
+          errMsg = error.response.data;
+        } else if (typeof error.response.data.title === 'string') {
+          errMsg = error.response.data.title;
+        } else if (error.response.data.errors) {
+          errMsg = Object.entries(error.response.data.errors).map(([field, messages]) => `${field}: ${messages.join(', ')}`).join(' | ');
+        } else {
+          errMsg = JSON.stringify(error.response.data);
+        }
+      }
+      setError(errMsg);
     }
     setImageFile(null);
     setImagePreview(null);
@@ -421,7 +445,7 @@ const AdminDashboard = () => {
           }}
         >
           <i className="fas fa-exclamation-circle me-2"></i>
-          {error}
+          {typeof error === 'string' ? error : (error?.title || JSON.stringify(error))}
         </Alert>
       )}
 
@@ -487,7 +511,13 @@ const AdminDashboard = () => {
                                 border: '1px solid #e2e8f0',
                                 marginRight: '12px'
                               }}
-                              onError={e => { e.target.onerror = null; e.target.src = '/images/no-image.png'; }}
+                              onError={(e) => {
+                                // Prevent infinite loop by using a data URL as fallback
+                                if (e.target.src !== 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjdGQUZDIi8+CjxwYXRoIGQ9Ik0yMCAxMkMxNS41ODIgMTIgMTIgMTUuNTgyIDEyIDIwQzEyIDI0LjQxOCAxNS41ODIgMjggMjAgMjhDMjQuNDE4IDI4IDI4IDI0LjQxOCAyOCAyMEMyOCAxNS41ODIgMjQuNDE4IDEyIDIwIDEyWk0yMCAyNkMxNy43OTEgMjYgMTYgMjQuMjA5IDE2IDIyQzE2IDE5Ljc5MSAxNy43OTEgMTggMjAgMThDMjIuMjA5IDE4IDI0IDE5Ljc5MSAyNCAyMkMyNCAyNC4yMDkgMjIuMjA5IDI2IDIwIDI2WiIgZmlsbD0iI0EwQUVBMiIvPgo8L3N2Zz4K') {
+                                  e.target.onerror = null;
+                                  e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjRjdGQUZDIi8+CjxwYXRoIGQ9Ik0yMCAxMkMxNS41ODIgMTIgMTIgMTUuNTgyIDEyIDIwQzEyIDI0LjQxOCAxNS41ODIgMjggMjAgMjhDMjQuNDE4IDI4IDI4IDI0LjQxOCAyOCAyMEMyOCAxNS41ODIgMjQuNDE4IDEyIDIwIDEyWk0yMCAyNkMxNy43OTEgMjYgMTYgMjQuMjA5IDE2IDIyQzE2IDE5Ljc5MSAxNy43OTEgMTggMjAgMThDMjIuMjA5IDE4IDI0IDE5Ljc5MSAyNCAyMkMyNCAyNC4yMDkgMjIuMjA5IDI2IDIwIDI2WiIgZmlsbD0iI0EwQUVBMiIvPgo8L3N2Zz4K';
+                                }
+                              }}
                             />
                             <span className="fw-semibold">{auction.title}</span>
                           </div>

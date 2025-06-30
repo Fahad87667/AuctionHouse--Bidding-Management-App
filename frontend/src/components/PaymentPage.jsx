@@ -34,18 +34,34 @@ const PaymentPage = () => {
 
   const handlePay = async () => {
     setPayError('');
-    setIntentLoading(true);
+    setPayLoading(true);
     try {
-      // Get payment intent (mock)
-      const res = await axios.post('http://localhost:5100/api/payments/stripe-intent', { AuctionId: auctionId }, {
+      // Mock payment: just confirm payment
+      await axios.post('http://localhost:5100/api/payments/confirm', {
+        AuctionId: auction.id,
+        TransactionId: 'mock_txn_' + Date.now(),
+        RawResponse: '{}'
+      }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      setClientSecret(res.data.clientSecret);
-      setShowModal(true);
+      setPaySuccess(true);
+      setTimeout(() => navigate(`/order-receipt/${auction.id}`), 2000);
     } catch (err) {
-      setPayError(err.response?.data || 'Payment failed');
+      let errMsg = 'Payment failed';
+      if (err.response?.data) {
+        if (typeof err.response.data === 'string') {
+          errMsg = err.response.data;
+        } else if (typeof err.response.data.title === 'string') {
+          errMsg = err.response.data.title;
+        } else if (typeof err.response.data.message === 'string') {
+          errMsg = err.response.data.message;
+        } else {
+          errMsg = JSON.stringify(err.response.data);
+        }
+      }
+      setPayError(errMsg);
     } finally {
-      setIntentLoading(false);
+      setPayLoading(false);
     }
   };
 
