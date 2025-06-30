@@ -12,6 +12,7 @@ A modern Auction Platform built with a .NET (C#) backend and a React frontend.
   - Place bids and view bid history (User)
   - Secure image upload and local storage
   - Responsive, modern UI
+  - **Order History tab in User Dashboard:** Users can now view all their past orders and download/view receipts for each order directly from the dashboard.
 
 ## 📸 Screenshots
 
@@ -65,6 +66,7 @@ cd frontend
 - Register as a user or login as admin (`admin@auction.com` by default)
 - Admins can create, edit, and delete auctions (image required)
 - Users can view auctions, place bids, and see their bid history
+- **Users can now view their Order History and download/view receipts for all completed orders from the dashboard.**
 - All images are stored locally in the backend's `wwwroot/images/` folder
 
 ## 💡 Notes
@@ -73,7 +75,6 @@ cd frontend
 - For development, use sample images in `frontend/public/images/` and `backend/wwwroot/images/`
 
 ## 📚 More Info
-- For detailed technical notes (in Hinglish), see `NOTES.md`
 
 ---
 

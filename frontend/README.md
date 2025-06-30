@@ -2,6 +2,9 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+**New Feature:**
+- The User Dashboard now has an **Order History** tab where users can view all their past orders and download/view receipts for each order.
+
 ## Available Scripts
 
 In the project directory, you can run:
