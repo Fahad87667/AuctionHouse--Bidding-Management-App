@@ -5,6 +5,13 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System.Linq;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -120,18 +127,28 @@ public class AuctionItemsController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "Admin,Seller")]
-    public async Task<IActionResult> Create(AuctionItem item)
+    public async Task<IActionResult> Create(CreateAuctionItemDTO dto)
     {
-        if (item.EndTime <= DateTime.UtcNow)
+        if (dto.EndTime <= DateTime.UtcNow)
             return BadRequest("End time must be in the future");
 
-        if (item.StartingPrice <= 0)
+        if (dto.StartingPrice <= 0)
             return BadRequest("Starting price must be greater than 0");
 
-        // Set owner and created time
         var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        item.OwnerId = userId;
-        item.CreatedAt = DateTime.UtcNow;
+        if (string.IsNullOrEmpty(userId))
+            return BadRequest("OwnerId could not be determined from user context");
+
+        var item = new AuctionItem
+        {
+            Title = dto.Title,
+            Description = dto.Description,
+            ImageUrl = dto.ImageUrl,
+            StartingPrice = dto.StartingPrice,
+            EndTime = dto.EndTime,
+            OwnerId = userId,
+            CreatedAt = DateTime.UtcNow
+        };
 
         _context.AuctionItems.Add(item);
         await _context.SaveChangesAsync();
@@ -140,24 +157,34 @@ public class AuctionItemsController : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin,Seller")]
-    public async Task<IActionResult> Update(int id, AuctionItem item)
+    public async Task<IActionResult> Update(int id, UpdateAuctionItemDTO dto)
     {
-        if (id != item.Id) return BadRequest();
-        
+        if (id != dto.Id) return BadRequest();
+
         var existingItem = await _context.AuctionItems.Include(a => a.Bids).FirstOrDefaultAsync(a => a.Id == id);
         if (existingItem == null) return NotFound();
-        
-        // Only allow edit if no bids placed
+
+        // Set OwnerId from user context (not from client)
+        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId))
+            return BadRequest("OwnerId could not be determined from user context");
+
         if (existingItem.Bids.Any())
-            return BadRequest("Cannot edit auction with existing bids");
-
-        // Explicitly set each property
-        existingItem.Title = item.Title;
-        existingItem.Description = item.Description;
-        existingItem.ImageUrl = item.ImageUrl;
-        existingItem.StartingPrice = item.StartingPrice;
-        existingItem.EndTime = item.EndTime;
-
+        {
+            // If there are bids, only allow updating Description and ImageUrl
+            existingItem.Description = dto.Description;
+            existingItem.ImageUrl = dto.ImageUrl;
+        }
+        else
+        {
+            // If no bids, allow updating all fields
+            existingItem.Title = dto.Title;
+            existingItem.Description = dto.Description;
+            existingItem.ImageUrl = dto.ImageUrl;
+            existingItem.StartingPrice = dto.StartingPrice;
+            existingItem.EndTime = dto.EndTime;
+        }
+        existingItem.OwnerId = userId;
         await _context.SaveChangesAsync();
         return NoContent();
     }

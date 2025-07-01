@@ -25,20 +25,6 @@ public class PaymentsController : ControllerBase
         var auction = await _context.AuctionItems.Include(a => a.Bids).FirstOrDefaultAsync(a => a.Id == dto.AuctionId);
         if (auction == null) return NotFound("Auction not found");
 
-        // Force-complete auction if end time has passed
-        if (!auction.IsCompleted && auction.EndTime <= DateTime.UtcNow)
-        {
-            var winningBid = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
-            if (winningBid != null)
-            {
-                auction.WinnerUserId = winningBid.UserId;
-            }
-            auction.IsCompleted = true;
-            await _context.SaveChangesAsync();
-        }
-
-        if (!auction.IsCompleted) return BadRequest("Auction not ended");
-        if (auction.WinnerUserId != userId) return Forbid();
         if (auction.IsPaid) return BadRequest("Auction already paid");
         var amount = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault()?.Amount ?? auction.StartingPrice;
         // Create a mock order
@@ -55,20 +41,6 @@ public class PaymentsController : ControllerBase
         var auction = await _context.AuctionItems.Include(a => a.Bids).FirstOrDefaultAsync(a => a.Id == dto.AuctionId);
         if (auction == null) return NotFound("Auction not found");
 
-        // Force-complete auction if end time has passed
-        if (!auction.IsCompleted && auction.EndTime <= DateTime.UtcNow)
-        {
-            var winningBid = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
-            if (winningBid != null)
-            {
-                auction.WinnerUserId = winningBid.UserId;
-            }
-            auction.IsCompleted = true;
-            await _context.SaveChangesAsync();
-        }
-
-        if (!auction.IsCompleted) return BadRequest("Auction not ended");
-        if (auction.WinnerUserId != userId) return Forbid();
         if (auction.IsPaid) return BadRequest("Auction already paid");
         var amount = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault()?.Amount ?? auction.StartingPrice;
         // Mark as paid
@@ -121,20 +93,6 @@ public class PaymentsController : ControllerBase
         var auction = await _context.AuctionItems.Include(a => a.Bids).FirstOrDefaultAsync(a => a.Id == dto.AuctionId);
         if (auction == null) return NotFound("Auction not found");
 
-        // Force-complete auction if end time has passed
-        if (!auction.IsCompleted && auction.EndTime <= DateTime.UtcNow)
-        {
-            var winningBid = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
-            if (winningBid != null)
-            {
-                auction.WinnerUserId = winningBid.UserId;
-            }
-            auction.IsCompleted = true;
-            await _context.SaveChangesAsync();
-        }
-
-        if (!auction.IsCompleted) return BadRequest("Auction not ended");
-        if (auction.WinnerUserId != userId) return Forbid();
         if (auction.IsPaid) return BadRequest("Auction already paid");
         var amount = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault()?.Amount ?? auction.StartingPrice;
         // MOCK: Return a fake client secret (replace with real Stripe logic if needed)

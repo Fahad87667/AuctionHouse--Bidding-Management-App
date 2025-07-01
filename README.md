@@ -69,13 +69,6 @@ cd frontend
 - **Users can now view their Order History and download/view receipts for all completed orders from the dashboard.**
 - All images are stored locally in the backend's `wwwroot/images/` folder
 
-## 💡 Notes
-- Make sure both backend and frontend are running for full functionality
-- Update connection strings and secrets in `backend/appsettings.json` as needed
-- For development, use sample images in `frontend/public/images/` and `backend/wwwroot/images/`
 
-## 📚 More Info
-
----
 
 Happy Bidding! 

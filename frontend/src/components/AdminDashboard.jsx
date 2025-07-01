@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Table, Button, Modal, Form, Alert, Row, Col, Badge, Tabs, Tab } from 'react-bootstrap';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import { toast } from 'react-toastify';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -70,35 +71,29 @@ const AdminDashboard = () => {
 
   const handleAddAuction = async (e) => {
     e.preventDefault();
-    
     // Validate form data
     if (!formData.title.trim()) {
-      setError('Title is required');
+      toast.error('Title is required');
       return;
     }
-    
     if (!formData.description.trim()) {
-      setError('Description is required');
+      toast.error('Description is required');
       return;
     }
-    
     if (!formData.startingPrice || parseFloat(formData.startingPrice) <= 0) {
-      setError('Starting price must be greater than 0');
+      toast.error('Starting price must be greater than 0');
       return;
     }
-    
     if (!formData.endTime) {
-      setError('End time is required');
+      toast.error('End time is required');
       return;
     }
-    
     const endDateLocal = new Date(formData.endTime);
     const endDateUTC = new Date(endDateLocal.getTime() - endDateLocal.getTimezoneOffset() * 60000);
     if (endDateUTC <= new Date()) {
-      setError('End time must be in the future');
+      toast.error('End time must be in the future');
       return;
     }
-    
     let imageUrl = formData.imageUrl?.trim() || '';
     if (imageFile) {
       const uploadData = new FormData();
@@ -109,11 +104,10 @@ const AdminDashboard = () => {
         });
         imageUrl = uploadRes.data.imageUrl;
       } catch (uploadErr) {
-        setError(uploadErr.response?.data || 'Image upload failed');
+        toast.error(uploadErr.response?.data || 'Image upload failed');
         return;
       }
     }
-    
     try {
       // Format the data properly for the backend
       const auctionData = {
@@ -121,10 +115,8 @@ const AdminDashboard = () => {
         description: formData.description.trim(),
         startingPrice: parseFloat(formData.startingPrice),
         imageUrl,
-        endTime: endDateUTC.toISOString(),
-        ownerId: user?.id || userId
+        endTime: endDateUTC.toISOString()
       };
-
       await axios.post('http://localhost:5100/api/auctionitems', auctionData);
       handleCloseAddModal();
       fetchData();
@@ -141,7 +133,7 @@ const AdminDashboard = () => {
           errMsg = JSON.stringify(error.response.data);
         }
       }
-      setError(errMsg);
+      toast.error(errMsg);
     }
     setImageFile(null);
     setImagePreview(null);
@@ -149,35 +141,29 @@ const AdminDashboard = () => {
 
   const handleEditAuction = async (e) => {
     e.preventDefault();
-    
     // Validate form data
     if (!formData.title.trim()) {
-      setError('Title is required');
+      toast.error('Title is required');
       return;
     }
-    
     if (!formData.description.trim()) {
-      setError('Description is required');
+      toast.error('Description is required');
       return;
     }
-    
     if (!formData.startingPrice || parseFloat(formData.startingPrice) <= 0) {
-      setError('Starting price must be greater than 0');
+      toast.error('Starting price must be greater than 0');
       return;
     }
-    
     if (!formData.endTime) {
-      setError('End time is required');
+      toast.error('End time is required');
       return;
     }
-    
     const endDateLocal = new Date(formData.endTime);
     const endDateUTC = new Date(endDateLocal.getTime() - endDateLocal.getTimezoneOffset() * 60000);
     if (endDateUTC <= new Date()) {
-      setError('End time must be in the future');
+      toast.error('End time must be in the future');
       return;
     }
-    
     let imageUrl = formData.imageUrl?.trim() || '';
     if (imageFile) {
       const uploadData = new FormData();
@@ -188,11 +174,10 @@ const AdminDashboard = () => {
         });
         imageUrl = uploadRes.data.imageUrl;
       } catch (uploadErr) {
-        setError(uploadErr.response?.data || 'Image upload failed');
+        toast.error(uploadErr.response?.data || 'Image upload failed');
         return;
       }
     }
-    
     try {
       // Format the data properly for the backend
       const auctionData = {
@@ -201,10 +186,8 @@ const AdminDashboard = () => {
         description: formData.description.trim(),
         startingPrice: parseFloat(formData.startingPrice),
         imageUrl,
-        endTime: endDateUTC.toISOString(),
-        ownerId: user?.id || userId
+        endTime: endDateUTC.toISOString()
       };
-
       await axios.put(`http://localhost:5100/api/auctionitems/${selectedAuction.id}`, auctionData);
       handleCloseEditModal();
       fetchData();
@@ -221,7 +204,7 @@ const AdminDashboard = () => {
           errMsg = JSON.stringify(error.response.data);
         }
       }
-      setError(errMsg);
+      toast.error(errMsg);
     }
     setImageFile(null);
     setImagePreview(null);
@@ -233,7 +216,11 @@ const AdminDashboard = () => {
         await axios.delete(`http://localhost:5100/api/auctionitems/${id}`);
         fetchData();
       } catch (error) {
-        setError('Failed to delete auction');
+        if (error.response && error.response.data === 'Cannot delete auction with existing bids') {
+          toast.error('Cannot delete an auction with bids on it!', { icon: '⚠️' });
+        } else {
+          setError('Failed to delete auction');
+        }
       }
     }
   };
@@ -738,23 +725,16 @@ const AdminDashboard = () => {
                             {bid.auctionTitle}
                           </small>
                           <small className="text-muted">
-                            {bid.timestamp ? (() => {
-                              let ts = bid.timestamp;
-                              // If not ISO, convert 'YYYY-MM-DD HH:mm:ss' to 'YYYY-MM-DDTHH:mm:ssZ'
-                              if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(ts)) {
-                                ts = ts.replace(' ', 'T') + 'Z';
-                              }
-                              return new Date(ts).toLocaleString('en-IN', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                second: '2-digit',
-                                hour12: true,
-                                timeZone: 'Asia/Kolkata'
-                              });
-                            })() : 'N/A'}
+                            <i className="far fa-clock me-1"></i>
+                            {bid.timestamp ? new Date(bid.timestamp).toLocaleString('en-GB', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit',
+                              hour12: true
+                            }) : 'N/A'}
                           </small>
                         </div>
                       </div>
@@ -926,7 +906,15 @@ const AdminDashboard = () => {
               )}
               {!imagePreview && formData.imageUrl && (
                 <div className="mt-2 text-center">
-                  <img src={formData.imageUrl} alt="Current" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '10px', border: '1px solid #e2e8f0' }} />
+                  <img
+                    src={
+                      formData.imageUrl.startsWith('http')
+                        ? formData.imageUrl
+                        : `http://localhost:5100${formData.imageUrl}`
+                    }
+                    alt="Current"
+                    style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                  />
                 </div>
               )}
             </Form.Group>
@@ -1068,7 +1056,15 @@ const AdminDashboard = () => {
               )}
               {!imagePreview && formData.imageUrl && (
                 <div className="mt-2 text-center">
-                  <img src={formData.imageUrl} alt="Current" style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '10px', border: '1px solid #e2e8f0' }} />
+                  <img
+                    src={
+                      formData.imageUrl.startsWith('http')
+                        ? formData.imageUrl
+                        : `http://localhost:5100${formData.imageUrl}`
+                    }
+                    alt="Current"
+                    style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                  />
                 </div>
               )}
             </Form.Group>
