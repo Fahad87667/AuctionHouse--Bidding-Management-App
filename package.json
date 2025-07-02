@@ -1,0 +1,12 @@
+{
+  "name": "dotnetproject-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  },
+  "scripts": {
+    "install-all": "npm --prefix frontend install && dotnet restore backend/eshop-api.csproj",
+    "start": "concurrently \" cd frontend && npm start\" \"cd backend && dotnet build && dotnet watch run\""
+  }
+} 
