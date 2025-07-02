@@ -38,9 +38,24 @@ DotNetProject/
   frontend/   # React frontend (UI, components, context)
   README.md   # This file
   Web.config  # IIS/ASP.NET config
+  package.json # Root scripts for install/start both frontend and backend
 ```
 
-## ⚙️ Setup Instructions
+## ⚡️ Quick Start (Monorepo Usage)
+
+From the project root, you can install all dependencies and start both servers with just two commands:
+
+```bash
+# Install all frontend and backend dependencies
+npm run install-all
+
+# Start both backend and frontend concurrently
+npm start
+```
+- The backend will run on `http://localhost:5100` by default.
+- The frontend will run on `http://localhost:3000` by default.
+
+## ⚙️ Advanced/Manual Setup Instructions
 
 ### 1. Backend (.NET)
 ```bash
@@ -61,9 +76,6 @@ cd frontend
 # Start the React app
  npm start
 ```
-
-- The backend runs on `http://localhost:5100` by default.
-- The frontend runs on `http://localhost:3000` by default.
 
 ## 📝 Usage
 - Register as a user or login as admin (`admin@auction.com` by default)
