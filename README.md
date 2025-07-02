@@ -16,8 +16,11 @@ A modern Auction Platform built with a .NET (C#) backend and a React frontend.
 
 ## 📸 Screenshots
 
-### Home / Auction List
-![Auction List](frontend/public/images/home.png)
+### Home
+![Home](frontend/public/images/home.png)
+
+### Auction List
+![Auction List](frontend/public/images/auctions.png)
 
 ### Auction Detail & Bidding
 ![Auction Detail](frontend/public/images/Detail.png)
