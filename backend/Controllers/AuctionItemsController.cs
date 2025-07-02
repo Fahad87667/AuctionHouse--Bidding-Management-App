@@ -171,9 +171,10 @@ public class AuctionItemsController : ControllerBase
 
         if (existingItem.Bids.Any())
         {
-            // If there are bids, only allow updating Description and ImageUrl
+            // Allow updating Description, ImageUrl, and EndTime if there are bids
             existingItem.Description = dto.Description;
             existingItem.ImageUrl = dto.ImageUrl;
+            existingItem.EndTime = dto.EndTime;
         }
         else
         {
@@ -195,11 +196,6 @@ public class AuctionItemsController : ControllerBase
     {
         var item = await _context.AuctionItems.Include(a => a.Bids).FirstOrDefaultAsync(a => a.Id == id);
         if (item == null) return NotFound();
-        
-        // Only allow delete if no bids placed
-        if (item.Bids.Any())
-            return BadRequest("Cannot delete auction with existing bids");
-            
         _context.AuctionItems.Remove(item);
         await _context.SaveChangesAsync();
         return NoContent();

@@ -342,21 +342,21 @@ const Home = () => {
         <Row className="g-4">
           {[
             {
-              name: 'Michael Chen',
+              name: 'Mohd Yusuf',
               role: 'Collector',
               image: 'https://ui-avatars.com/api/?name=Michael+Chen&background=667eea&color=fff',
               text: "Found a rare vintage watch at an incredible price. The bidding process was smooth and exciting!",
               rating: 5
             },
             {
-              name: 'Sarah Johnson',
+              name: 'Mohd Anas',
               role: 'Art Enthusiast',
               image: 'https://ui-avatars.com/api/?name=Sarah+Johnson&background=764ba2&color=fff',
               text: "Best auction platform I've used. The authentication process gives me confidence in every purchase.",
               rating: 5
             },
             {
-              name: 'David Park',
+              name: 'Sohail Khan',
               role: 'Tech Buyer',
               image: 'https://ui-avatars.com/api/?name=David+Park&background=48bb78&color=fff',
               text: "Scored amazing deals on electronics. The real-time bidding feature keeps me on the edge of my seat!",

@@ -1,11 +1,14 @@
 import React from 'react';
 import { Container, Row, Col, Card } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 // Import developer photos - place your images in src/assets/images/
 // import developer1Photo from '../assets/images/developer1.jpg';
 // import developer2Photo from '../assets/images/developer2.jpg';
 
 const About = () => {
+  const navigate = useNavigate();
+
   const developers = [
     {
       name: 'Fahad Khan',
@@ -233,137 +236,146 @@ const About = () => {
 
         <Row className="g-4 justify-content-center">
           {developers.map((dev, index) => (
-            <Col lg={6} key={index}>
-              <div style={{
-                background: 'white',
-                borderRadius: '24px',
-                overflow: 'hidden',
-                boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
-                transition: 'all 0.3s',
-                height: '100%'
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-10px)';
-                e.currentTarget.style.boxShadow = '0 20px 60px rgba(102, 126, 234, 0.2)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 10px 40px rgba(0,0,0,0.08)';
-              }}>
+            <Col lg={5} md={6} sm={12} key={index} className="d-flex justify-content-center">
+              <div
+                style={{
+                  background: 'rgba(255,255,255,0.85)',
+                  borderRadius: '32px',
+                  boxShadow: '0 8px 32px rgba(102,126,234,0.12)',
+                  position: 'relative',
+                  width: '340px',
+                  margin: '48px 0 24px',
+                  padding: '32px 24px 24px 24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  transition: 'all 0.3s',
+                  border: '1.5px solid #e2e8f0',
+                  overflow: 'visible',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-10px) scale(1.03)';
+                  e.currentTarget.style.boxShadow = '0 16px 48px 0 rgba(102,126,234,0.18)';
+                  e.currentTarget.style.borderColor = '#667eea';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = '0 8px 32px rgba(102,126,234,0.12)';
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                }}
+              >
+                {/* Profile Image - large and overlaid */}
                 <div style={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  height: '120px',
-                  position: 'relative'
+                  position: 'absolute',
+                  top: '-70px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '140px',
+                  height: '140px',
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  border: '6px solid #fff',
+                  boxShadow: '0 4px 24px rgba(102,126,234,0.12)',
+                  background: '#f8fafc',
+                  zIndex: 2
                 }}>
-                  <div style={{
-                    position: 'absolute',
-                    bottom: '-60px',
-                    left: '30px',
-                    width: '120px',
-                    height: '120px',
-                    borderRadius: '20px',
-                    overflow: 'hidden',
-                    border: '4px solid white',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-                  }}>
-                    <img
-                      src={dev.image}
-                      alt={dev.name}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
-                      }}
-                      onError={(e) => {
-                        e.target.src = `https://ui-avatars.com/api/?name=${dev.name.replace(' ', '+')}&background=667eea&color=fff&size=200`;
-                      }}
-                    />
-                  </div>
+                  <img
+                    src={dev.image}
+                    alt={dev.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderRadius: '50%'
+                    }}
+                    onError={(e) => {
+                      e.target.src = `https://ui-avatars.com/api/?name=${dev.name.replace(' ', '+')}&background=667eea&color=fff&size=200`;
+                    }}
+                  />
                 </div>
-                
-                <div style={{ padding: '18px', paddingTop: '60px' }}>
-                  <h4 className="fw-bold mb-1" style={{ color: '#2d3748' }}>{dev.name}</h4>
-                  <p style={{ color: '#764ba2', fontWeight: '600', marginBottom: '20px' }}>{dev.role}</p>
-                  <p className="text-muted mb-4" style={{ fontSize: '15px' }}>{dev.bio}</p>
-                  
+                {/* Card Content */}
+                <div style={{ paddingTop: '90px', textAlign: 'center', width: '100%' }}>
+                  <h4 className="fw-bold mb-1" style={{ color: '#2d3748', fontSize: '1.5rem' }}>{dev.name}</h4>
+                  <p style={{ color: '#764ba2', fontWeight: '600', marginBottom: '16px', fontSize: '1.1rem' }}>{dev.role}</p>
+                  <p className="text-muted mb-4" style={{ fontSize: '15px', minHeight: '48px' }}>{dev.bio}</p>
                   {dev.skills && (
-                    <div className="mb-3">
-                      <div className="d-flex flex-wrap gap-2">
-                        {dev.skills.map((skill, idx) => (
-                          <span 
-                            key={idx}
-                            style={{ 
-                              background: 'linear-gradient(135deg, #667eea10 0%, #764ba210 100%)',
-                              color: '#667eea',
-                              padding: '6px 16px',
-                              borderRadius: '8px',
-                              fontSize: '13px',
-                              fontWeight: '500',
-                              border: '1px solid #667eea20'
-                            }}
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
+                    <div className="mb-3 d-flex flex-wrap justify-content-center gap-2">
+                      {dev.skills.map((skill, idx) => (
+                        <span
+                          key={idx}
+                          style={{
+                            background: 'linear-gradient(135deg, #667eea20 0%, #764ba220 100%)',
+                            color: '#667eea',
+                            padding: '7px 18px',
+                            borderRadius: '16px',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            border: '1.5px solid #667eea30',
+                            letterSpacing: '0.5px',
+                          }}
+                        >
+                          {skill}
+                        </span>
+                      ))}
                     </div>
                   )}
-                  
-                  <div className="d-flex gap-2">
-                    <a 
-                      href={dev.github} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      style={{ 
-                        width: '36px', 
-                        height: '36px', 
-                        background: '#f8fafc', 
-                        borderRadius: '8px', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        color: '#4a5568', 
-                        transition: 'all 0.2s', 
+                  <div className="d-flex justify-content-center gap-3 mt-2">
+                    <a
+                      href={dev.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        background: '#f8fafc',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#4a5568',
+                        fontSize: '1.3rem',
+                        border: '1.5px solid #e2e8f0',
+                        transition: 'all 0.2s',
                         textDecoration: 'none',
-                        border: '1px solid #e2e8f0'
-                      }} 
-                      onMouseOver={e => { 
-                        e.currentTarget.style.background = '#667eea'; 
-                        e.currentTarget.style.color = 'white'; 
+                      }}
+                      onMouseOver={e => {
+                        e.currentTarget.style.background = '#667eea';
+                        e.currentTarget.style.color = 'white';
                         e.currentTarget.style.borderColor = '#667eea';
-                      }} 
-                      onMouseOut={e => { 
-                        e.currentTarget.style.background = '#f8fafc'; 
+                      }}
+                      onMouseOut={e => {
+                        e.currentTarget.style.background = '#f8fafc';
                         e.currentTarget.style.color = '#4a5568';
                         e.currentTarget.style.borderColor = '#e2e8f0';
                       }}
                     >
                       <i className="fab fa-github"></i>
                     </a>
-                    <a 
-                      href={dev.linkedin} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      style={{ 
-                        width: '36px', 
-                        height: '36px', 
-                        background: '#f8fafc', 
-                        borderRadius: '8px', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center', 
-                        color: '#4a5568', 
-                        transition: 'all 0.2s', 
+                    <a
+                      href={dev.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        background: '#f8fafc',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#4a5568',
+                        fontSize: '1.3rem',
+                        border: '1.5px solid #e2e8f0',
+                        transition: 'all 0.2s',
                         textDecoration: 'none',
-                        border: '1px solid #e2e8f0'
-                      }} 
-                      onMouseOver={e => { 
-                        e.currentTarget.style.background = '#0077b5'; 
+                      }}
+                      onMouseOver={e => {
+                        e.currentTarget.style.background = '#0077b5';
                         e.currentTarget.style.color = 'white';
                         e.currentTarget.style.borderColor = '#0077b5';
-                      }} 
-                      onMouseOut={e => { 
-                        e.currentTarget.style.background = '#f8fafc'; 
+                      }}
+                      onMouseOut={e => {
+                        e.currentTarget.style.background = '#f8fafc';
                         e.currentTarget.style.color = '#4a5568';
                         e.currentTarget.style.borderColor = '#e2e8f0';
                       }}
@@ -371,28 +383,29 @@ const About = () => {
                       <i className="fab fa-linkedin-in"></i>
                     </a>
                     {dev.email && (
-                      <a 
-                        href={`mailto:${dev.email}`} 
-                        style={{ 
-                          width: '36px', 
-                          height: '36px', 
-                          background: '#f8fafc', 
-                          borderRadius: '8px', 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          justifyContent: 'center', 
-                          color: '#4a5568', 
-                          transition: 'all 0.2s', 
+                      <a
+                        href={`mailto:${dev.email}`}
+                        style={{
+                          width: '44px',
+                          height: '44px',
+                          background: '#f8fafc',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#4a5568',
+                          fontSize: '1.3rem',
+                          border: '1.5px solid #e2e8f0',
+                          transition: 'all 0.2s',
                           textDecoration: 'none',
-                          border: '1px solid #e2e8f0'
-                        }} 
-                        onMouseOver={e => { 
-                          e.currentTarget.style.background = '#764ba2'; 
+                        }}
+                        onMouseOver={e => {
+                          e.currentTarget.style.background = '#764ba2';
                           e.currentTarget.style.color = 'white';
                           e.currentTarget.style.borderColor = '#764ba2';
-                        }} 
-                        onMouseOut={e => { 
-                          e.currentTarget.style.background = '#f8fafc'; 
+                        }}
+                        onMouseOut={e => {
+                          e.currentTarget.style.background = '#f8fafc';
                           e.currentTarget.style.color = '#4a5568';
                           e.currentTarget.style.borderColor = '#e2e8f0';
                         }}
@@ -448,6 +461,7 @@ const About = () => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.2)';
                 }}
+                onClick={() => navigate('/auctions')}
               >
                 Get Started Today
               </button>

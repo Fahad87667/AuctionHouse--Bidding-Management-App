@@ -173,12 +173,12 @@ const Footer = () => {
                   }}
                 >
                   <i className="fas fa-chevron-right me-2" style={{ fontSize: '12px' }}></i>
-                  Live Auctions
+                  Home
                 </Link>
               </li>
               <li className="mb-2">
                 <Link 
-                  to="/dashboard" 
+                  to="/auctions" 
                   className="text-light opacity-75 text-decoration-none"
                   style={{ transition: 'all 0.3s ease' }}
                   onMouseOver={(e) => {
@@ -191,12 +191,12 @@ const Footer = () => {
                   }}
                 >
                   <i className="fas fa-chevron-right me-2" style={{ fontSize: '12px' }}></i>
-                  Dashboard
+                  Auctions
                 </Link>
               </li>
               <li className="mb-2">
                 <Link 
-                  to="/register" 
+                  to="/about" 
                   className="text-light opacity-75 text-decoration-none"
                   style={{ transition: 'all 0.3s ease' }}
                   onMouseOver={(e) => {
@@ -209,12 +209,12 @@ const Footer = () => {
                   }}
                 >
                   <i className="fas fa-chevron-right me-2" style={{ fontSize: '12px' }}></i>
-                  Register
+                  About
                 </Link>
               </li>
               <li className="mb-2">
                 <Link 
-                  to="/login" 
+                  to="/contact" 
                   className="text-light opacity-75 text-decoration-none"
                   style={{ transition: 'all 0.3s ease' }}
                   onMouseOver={(e) => {
@@ -227,7 +227,7 @@ const Footer = () => {
                   }}
                 >
                   <i className="fas fa-chevron-right me-2" style={{ fontSize: '12px' }}></i>
-                  Login
+                  Contact Us
                 </Link>
               </li>
             </ul>

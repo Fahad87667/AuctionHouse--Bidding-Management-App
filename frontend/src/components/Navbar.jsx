@@ -100,6 +100,22 @@ const NavigationBar = () => {
               About
             </Nav.Link>
             
+            <Nav.Link 
+              as={Link} 
+              to="/contact"
+              className="mx-2 fw-semibold"
+              style={{ 
+                color: '#4a5568',
+                transition: 'color 0.2s ease',
+                position: 'relative'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.color = '#667eea'}
+              onMouseOut={(e) => e.currentTarget.style.color = '#4a5568'}
+            >
+              <i className="fas fa-envelope me-2"></i>
+              Contact Us
+            </Nav.Link>
+            
             <div className="d-flex align-items-center ms-lg-4">
               {user ? (
                 <>

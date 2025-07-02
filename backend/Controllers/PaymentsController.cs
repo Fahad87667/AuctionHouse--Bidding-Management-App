@@ -66,8 +66,27 @@ public class PaymentsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetLogs()
     {
-        var logs = await _context.Payments.OrderByDescending(p => p.Timestamp).ToListAsync();
-        return Ok(logs);
+        var logs = await _context.Payments
+            .OrderByDescending(p => p.Timestamp)
+            .ToListAsync();
+        var userIds = logs.Select(p => p.UserId).Distinct().ToList();
+        var users = _context.Users.Where(u => userIds.Contains(u.Id)).ToList();
+        var logsWithUser = logs.Select(p => {
+            var user = users.FirstOrDefault(u => u.Id == p.UserId);
+            return new {
+                p.Id,
+                p.AuctionId,
+                p.UserId,
+                UserName = user != null ? user.UserName : null,
+                UserEmail = user != null ? user.Email : null,
+                p.Amount,
+                p.Status,
+                p.TransactionId,
+                p.Timestamp,
+                p.Gateway
+            };
+        });
+        return Ok(logsWithUser);
     }
 
     // GET: api/payments/my-payments

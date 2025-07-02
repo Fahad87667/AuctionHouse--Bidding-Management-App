@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -9,7 +10,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -20,9 +21,11 @@ const Login = () => {
     const result = await login(email, password);
     
     if (result.success) {
+      toast.success('Logged in successfully!');
       navigate('/');
     } else {
       setError(result.error);
+      toast.error(result.error || 'Login failed');
     }
     
     setLoading(false);

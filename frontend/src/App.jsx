@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Container } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // Components
@@ -19,6 +19,7 @@ import Home from './components/Home';
 import UserDashboard from './components/UserDashboard';
 import PaymentPage from './components/PaymentPage';
 import OrderReciept from './components/OrderReciept';
+import ContactUs from './components/ContactUs';
 
 // Auth Context
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -84,10 +85,22 @@ function App() {
                 </ProtectedRoute>
               } />
               <Route path="/order-receipt/:auctionId" element={<OrderReciept />} />
+              <Route path="/contact" element={<ContactUs />} />
             </Routes>
           </Container>
           <Footer />
-          <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover />
+          <ToastContainer 
+            position="top-right" 
+            autoClose={600} 
+            hideProgressBar={false} 
+            newestOnTop 
+            closeOnClick 
+            pauseOnFocusLoss 
+            draggable 
+            pauseOnHover 
+            transition={Slide}
+            limit={3}
+          />
         </div>
       </Router>
     </AuthProvider>

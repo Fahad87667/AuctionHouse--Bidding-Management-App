@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { toast } from 'react-toastify';
 
 const Register = () => {
   const [email, setEmail] = useState('');
@@ -20,22 +21,27 @@ const Register = () => {
 
     if (!username.trim()) {
       setError('Username is required');
+      toast.error('Username is required');
       return;
     }
     if (password !== confirmPassword) {
       setError('Passwords do not match');
+      toast.error('Passwords do not match');
       return;
     }
     if (password.length < 6) {
       setError('Password must be at least 6 characters long');
+      toast.error('Password must be at least 6 characters long');
       return;
     }
     setLoading(true);
     const result = await register(username, email, password, confirmPassword);
     if (result.success) {
+      toast.success(`Registration successful! Welcome ${username}`);
       navigate('/');
     } else {
       setError(result.error);
+      toast.error(result.error || 'Registration failed');
     }
     setLoading(false);
   };

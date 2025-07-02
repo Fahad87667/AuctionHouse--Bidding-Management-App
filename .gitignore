@@ -27,3 +27,82 @@ Thumbs.db
 
 NOTES.md
 NOTES.pdf
+
+# OS
+*.swp
+*.swo
+*.tmp
+*.bak
+*.old
+*.orig
+*.log
+*.vs/
+
+# Editor/IDE
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+*.user
+*.suo
+*.ncb
+*.opendb
+*.VC.db
+*.vscode/
+*.idea/
+
+# npm/yarn/pnpm
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build output
+build/
+dist/
+
+# Misc
+*.tgz
+*.zip
+*.7z
+*.tar
+*.gz
+*.rar
+*.bak
+*.tmp
+*.swp
+*.swo
+
+# System
+Thumbs.db
+.DS_Store
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# Test/coverage
+coverage/
+.nyc_output/
+
+# Local env
+.env
+.env.*
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Python (if any)
+__pycache__/
+*.pyc
+
+# Mac
+.AppleDouble
+.LSOverride
+
+# Windows
+$RECYCLE.BIN/
+
+# Others
+*.pid
+*.seed
+*.pid.lock

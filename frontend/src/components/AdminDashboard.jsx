@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, Table, Button, Modal, Form, Alert, Row, Col, Badge, Tabs, Tab } from 'react-bootstrap';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -25,15 +25,72 @@ const AdminDashboard = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [activeTab, setActiveTab] = useState('summary');
   const userId = window.localStorage.getItem('userId');
+  const [newPaymentsCount, setNewPaymentsCount] = useState(0);
+  const [newBidsCount, setNewBidsCount] = useState(0);
+  const prevPaymentsLength = useRef(0);
+  const prevBidsLength = useRef(0);
 
   useEffect(() => {
-    fetchData();
+    // Initial load with loading spinner
+    fetchData(true);
     fetchPayments();
   }, []);
 
-  const fetchData = async () => {
+  // Track new payments
+  useEffect(() => {
+    if (payments.length > prevPaymentsLength.current) {
+      setNewPaymentsCount(count => count + (payments.length - prevPaymentsLength.current));
+    }
+    prevPaymentsLength.current = payments.length;
+  }, [payments]);
+
+  // Track new bids
+  useEffect(() => {
+    if (bids.length > prevBidsLength.current) {
+      setNewBidsCount(count => count + (bids.length - prevBidsLength.current));
+    }
+    prevBidsLength.current = bids.length;
+  }, [bids]);
+
+  // Delete all auctions if badge is cleared
+  useEffect(() => {
+    if (newPaymentsCount === 0 && prevPaymentsLength.current > 0) {
+      deleteAllAuctions();
+    }
+    // eslint-disable-next-line
+  }, [newPaymentsCount]);
+
+  useEffect(() => {
+    if (newBidsCount === 0 && prevBidsLength.current > 0) {
+      deleteAllAuctions();
+    }
+    // eslint-disable-next-line
+  }, [newBidsCount]);
+
+  const deleteAllAuctions = async () => {
+    for (const auction of auctions) {
+      // Only delete auctions that are ended (isCompleted or endTime in the past)
+      const isEnded = auction.isCompleted || new Date(auction.endTime) <= new Date();
+      if (isEnded) {
+        try {
+          await axios.delete(`http://localhost:5100/api/auctionitems/${auction.id}`);
+        } catch (error) {
+          // Ignore errors (shouldn't happen if backend allows delete)
+        }
+      }
+    }
+    fetchData();
+  };
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'payments' && newPaymentsCount > 0) setNewPaymentsCount(0);
+    if (tab === 'bids' && newBidsCount > 0) setNewBidsCount(0);
+  };
+
+  const fetchData = async (showLoading = false) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const [auctionsResponse, bidsResponse] = await Promise.all([
         axios.get('http://localhost:5100/api/auctionitems'),
         axios.get('http://localhost:5100/api/bids')
@@ -44,7 +101,7 @@ const AdminDashboard = () => {
       setError('Failed to load data');
       console.error('Error fetching data:', error);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
@@ -118,6 +175,7 @@ const AdminDashboard = () => {
         endTime: endDateUTC.toISOString()
       };
       await axios.post('http://localhost:5100/api/auctionitems', auctionData);
+      toast.success('Item added successfully!');
       handleCloseAddModal();
       fetchData();
     } catch (error) {
@@ -189,6 +247,7 @@ const AdminDashboard = () => {
         endTime: endDateUTC.toISOString()
       };
       await axios.put(`http://localhost:5100/api/auctionitems/${selectedAuction.id}`, auctionData);
+      toast.success('Item updated successfully!');
       handleCloseEditModal();
       fetchData();
     } catch (error) {
@@ -214,13 +273,10 @@ const AdminDashboard = () => {
     if (window.confirm('Are you sure you want to delete this auction?')) {
       try {
         await axios.delete(`http://localhost:5100/api/auctionitems/${id}`);
+        toast.success('Item deleted successfully');
         fetchData();
       } catch (error) {
-        if (error.response && error.response.data === 'Cannot delete auction with existing bids') {
-          toast.error('Cannot delete an auction with bids on it!', { icon: '⚠️' });
-        } else {
-          setError('Failed to delete auction');
-        }
+        toast.error('Failed to delete auction');
       }
     }
   };
@@ -262,14 +318,16 @@ const AdminDashboard = () => {
 
   const formatDate = (dateString) => {
     const d = new Date(dateString);
-    return d.toLocaleString('en-IN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
+    // Custom format: 10 Jul 2025, 02:41 PM
+    const day = d.getDate().toString().padStart(2, '0');
+    const month = d.toLocaleString('en-GB', { month: 'short' });
+    const year = d.getFullYear();
+    let hour = d.getHours();
+    const minute = d.getMinutes().toString().padStart(2, '0');
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12;
+    hour = hour ? hour : 12; // the hour '0' should be '12'
+    return `${day} ${month} ${year}, ${hour.toString().padStart(2, '0')}:${minute} ${ampm}`;
   };
 
   const getStatusBadge = (auction) => {
@@ -439,7 +497,7 @@ const AdminDashboard = () => {
       <Tabs
         id="admin-dashboard-tabs"
         activeKey={activeTab}
-        onSelect={setActiveTab}
+        onSelect={handleTabClick}
         className="mb-4"
         style={{
           borderBottom: 'none'
@@ -523,9 +581,8 @@ const AdminDashboard = () => {
                             {auction.bidCount} bids
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-muted">
+                        <td className="py-3 px-4 text-muted" style={{ whiteSpace: 'nowrap' }}>
                           <small>
-                            <i className="far fa-calendar me-1"></i>
                             {formatDate(auction.endTime)}
                           </small>
                         </td>
@@ -541,53 +598,54 @@ const AdminDashboard = () => {
                         </td>
                         <td className="py-3 px-4">{getStatusBadge(auction)}</td>
                         <td className="py-3 px-4">
-                          <Button
-                            size="sm"
-                            className="me-2"
-                            onClick={() => openEditModal(auction)}
-                            style={{
-                              background: 'linear-gradient(135deg, #63b3ed 0%, #4299e1 100%)',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '8px',
-                              padding: '6px 12px',
-                              fontWeight: '600',
-                              boxShadow: '0 2px 8px rgba(66, 153, 225, 0.08)',
-                              transition: 'all 0.2s ease'
-                            }}
-                            onMouseOver={(e) => {
-                              e.currentTarget.style.background = 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)';
-                            }}
-                            onMouseOut={(e) => {
-                              e.currentTarget.style.background = 'linear-gradient(135deg, #63b3ed 0%, #4299e1 100%)';
-                            }}
-                          >
-                            <i className="fas fa-edit me-1"></i>
-                            Edit
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => handleDeleteAuction(auction.id)}
-                            style={{
-                              background: 'linear-gradient(135deg, #feb2b2 0%, #f56565 100%)',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '8px',
-                              padding: '6px 12px',
-                              fontWeight: '600',
-                              boxShadow: '0 2px 8px rgba(245, 101, 101, 0.08)',
-                              transition: 'all 0.2s ease'
-                            }}
-                            onMouseOver={(e) => {
-                              e.currentTarget.style.background = 'linear-gradient(135deg, #f56565 0%, #c53030 100%)';
-                            }}
-                            onMouseOut={(e) => {
-                              e.currentTarget.style.background = 'linear-gradient(135deg, #feb2b2 0%, #f56565 100%)';
-                            }}
-                          >
-                            <i className="fas fa-trash me-1"></i>
-                            Delete
-                          </Button>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <Button
+                              size="sm"
+                              onClick={() => openEditModal(auction)}
+                              style={{
+                                background: 'linear-gradient(135deg, #63b3ed 0%, #4299e1 100%)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                padding: '6px 12px',
+                                fontWeight: '600',
+                                boxShadow: '0 2px 8px rgba(66, 153, 225, 0.08)',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseOver={(e) => {
+                                e.currentTarget.style.background = 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)';
+                              }}
+                              onMouseOut={(e) => {
+                                e.currentTarget.style.background = 'linear-gradient(135deg, #63b3ed 0%, #4299e1 100%)';
+                              }}
+                            >
+                              <i className="fas fa-edit me-1"></i>
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => handleDeleteAuction(auction.id)}
+                              style={{
+                                background: 'linear-gradient(135deg, #feb2b2 0%, #f56565 100%)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                padding: '6px 12px',
+                                fontWeight: '600',
+                                boxShadow: '0 2px 8px rgba(245, 101, 101, 0.08)',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseOver={(e) => {
+                                e.currentTarget.style.background = 'linear-gradient(135deg, #f56565 0%, #c53030 100%)';
+                              }}
+                              onMouseOut={(e) => {
+                                e.currentTarget.style.background = 'linear-gradient(135deg, #feb2b2 0%, #f56565 100%)';
+                              }}
+                            >
+                              <i className="fas fa-trash me-1"></i>
+                              Delete
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -607,10 +665,25 @@ const AdminDashboard = () => {
               background: activeTab === 'bids' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
               color: activeTab === 'bids' ? 'white' : '#667eea',
               fontWeight: '600',
-              display: 'inline-block'
+              display: 'inline-block',
+              position: 'relative'
             }}>
               <i className="fas fa-history me-2"></i>
               Recent Bids
+              {newBidsCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-8px',
+                  right: '-8px',
+                  background: 'red',
+                  color: 'white',
+                  borderRadius: '50%',
+                  padding: '2px 8px',
+                  fontSize: '0.8em',
+                  fontWeight: 'bold',
+                  zIndex: 1
+                }}>{newBidsCount}</span>
+              )}
             </span>
           }
         >
@@ -754,40 +827,86 @@ const AdminDashboard = () => {
               background: activeTab === 'payments' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'transparent',
               color: activeTab === 'payments' ? 'white' : '#667eea',
               fontWeight: '600',
-              display: 'inline-block'
+              display: 'inline-block',
+              position: 'relative'
             }}>
               <i className="fas fa-receipt me-2"></i>
               Payments
+              {newPaymentsCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-8px',
+                  right: '-8px',
+                  background: 'red',
+                  color: 'white',
+                  borderRadius: '50%',
+                  padding: '2px 8px',
+                  fontSize: '0.8em',
+                  fontWeight: 'bold',
+                  zIndex: 1
+                }}>{newPaymentsCount}</span>
+              )}
             </span>
           }
         >
-          <Card className="border-0 shadow-sm" style={{ borderRadius: '20px' }}>
+          <Card className="border-0 shadow-sm" style={{ borderRadius: '20px', background: 'linear-gradient(135deg, #f8fafc 0%, #e9e4f0 100%)', boxShadow: '0 4px 24px rgba(102,126,234,0.08)' }}>
+            <Card.Header className="bg-white border-0 p-4" style={{ borderRadius: '20px 20px 0 0', borderBottom: '1px solid #f0f4f8', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+              <h5 className="mb-0 fw-bold" style={{ color: 'white', letterSpacing: '1px' }}>
+                <i className="fas fa-receipt me-2"></i>
+                Payment History
+              </h5>
+            </Card.Header>
             <Card.Body className="p-0">
               <div className="table-responsive">
-                <Table hover className="mb-0">
-                  <thead style={{ backgroundColor: '#f8fafc' }}>
+                <Table hover className="mb-0" style={{ borderRadius: '0 0 25px 20px', overflow: 'hidden', background: 'transparent' }}>
+                  <thead style={{ background: 'linear-gradient(135deg, #e9e4f0 0%, #f8fafc 100%)', border: 'none' }}>
                     <tr>
                       <th className="border-0 py-3 px-4 fw-semibold text-secondary">AuctionId</th>
                       <th className="border-0 py-3 px-4 fw-semibold text-secondary">UserId</th>
+                      <th className="border-0 py-3 px-4 fw-semibold text-secondary text-start">UserName</th>
                       <th className="border-0 py-3 px-4 fw-semibold text-secondary">Amount</th>
                       <th className="border-0 py-3 px-4 fw-semibold text-secondary">Status</th>
                       <th className="border-0 py-3 px-4 fw-semibold text-secondary">TransactionId</th>
                       <th className="border-0 py-3 px-4 fw-semibold text-secondary">Timestamp</th>
-                      <th className="border-0 py-3 px-4 fw-semibold text-secondary">Gateway</th>
+                      {/* <th className="border-0 py-3 px-4 fw-semibold text-secondary">Gateway</th> */}
                     </tr>
                   </thead>
                   <tbody>
                     {payments.length === 0 ? (
-                      <tr><td colSpan="7" className="text-center py-4">No payments yet</td></tr>
+                      <tr><td colSpan="8" className="text-center py-4">No payments yet</td></tr>
                     ) : payments.map((p, idx) => (
-                      <tr key={p.id || idx}>
-                        <td className="py-3 px-4">{p.auctionId}</td>
-                        <td className="py-3 px-4">{p.userId}</td>
-                        <td className="py-3 px-4">₹{Number(p.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-                        <td className="py-3 px-4">{p.status}</td>
-                        <td className="py-3 px-4">{p.transactionId}</td>
-                        <td className="py-3 px-4">{new Date(p.timestamp).toLocaleString('en-IN')}</td>
-                        <td className="py-3 px-4">{p.gateway}</td>
+                      <tr key={p.id || idx} style={{ transition: 'background 0.2s', cursor: 'pointer' }}
+                        onMouseOver={e => e.currentTarget.style.background = '#f0f4f8'}
+                        onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                        <td className="py-3 px-4" style={{ fontWeight: 600, color: '#667eea' }}>{p.auctionId}</td>
+                        <td className="py-3 px-4" style={{ color: '#888' }}>{p.userId}</td>
+                        <td className="py-3 px-4 text-start" style={{ fontWeight: 500, color: '#2d3748', paddingLeft: '32px' }}>{p.userName || p.UserName || '-'}</td>
+                        <td className="py-3 px-4">
+                          <span style={{ color: '#38a169', fontWeight: 700, fontSize: '1.1em' }}>₹{Number(p.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span style={{
+                            background: p.status === 'Success' ? 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)' : '#feb2b2',
+                            color: p.status === 'Success' ? 'white' : '#c53030',
+                            borderRadius: '12px',
+                            padding: '6px 16px',
+                            fontWeight: 600,
+                            fontSize: '0.95em',
+                            boxShadow: p.status === 'Success' ? '0 2px 8px rgba(72,187,120,0.08)' : '0 2px 8px rgba(245,101,101,0.08)'
+                          }}>{p.status}</span>
+                        </td>
+                        <td className="py-3 px-4" style={{ color: '#555', fontFamily: 'monospace', fontSize: '0.97em' }}>{p.transactionId}</td>
+                        <td className="py-3 px-4" style={{ color: '#555' }}>{new Date(p.timestamp).toLocaleString('en-IN')}</td>
+                        {/* <td className="py-3 px-4">
+                          <span style={{
+                            background: '#e9e4f0',
+                            color: '#764ba2',
+                            borderRadius: '10px',
+                            padding: '4px 12px',
+                            fontWeight: 600,
+                            fontSize: '0.95em'
+                          }}>{p.gateway}</span>
+                        </td> */}
                       </tr>
                     ))}
                   </tbody>
@@ -1040,13 +1159,12 @@ const AdminDashboard = () => {
             </Row>
             <Form.Group className="mb-4">
               <Form.Label className="fw-semibold text-secondary">
-                <i className="fas fa-image me-2"></i>Image (Required)
+                <i className="fas fa-image me-2"></i>Image
               </Form.Label>
               <Form.Control
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                required
                 style={{ borderRadius: '10px', border: '1.5px solid #e2e8f0', padding: '12px' }}
               />
               {imagePreview && (
