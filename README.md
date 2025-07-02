@@ -1,4 +1,4 @@
-# DotNetProject
+# AuctionHouse
 
 A modern Auction Platform built with a .NET (C#) backend and a React frontend.
 
